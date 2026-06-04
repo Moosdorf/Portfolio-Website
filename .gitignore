@@ -1,1 +1,93 @@
-*.vsidx
+# ========================
+# .NET / C#
+# ========================
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vs/
+*.rsuser
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.psess
+*.vsp
+*.vspx
+*.sap
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/packages/repositories.config
+
+# Publish
+**/publish/
+**/out/
+
+# ========================
+# React / Node
+# ========================
+node_modules/
+dist/
+build/
+.next/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ========================
+# Tailwind
+# ========================
+# (compiled output already covered by dist/ above)
+
+# ========================
+# Docker
+# ========================
+.docker/
+docker-compose.override.yml
+
+# ========================
+# PostgreSQL
+# ========================
+*.sql.bak
+pgdata/
+postgres-data/
+
+# ========================
+# IDEs & Editors
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ========================
+# Secrets & Config
+# ========================
+*.env
+appsettings.Development.json
+appsettings.Local.json
+secrets.json

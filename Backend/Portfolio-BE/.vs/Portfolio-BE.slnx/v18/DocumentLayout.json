@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\andre\\Documents\\GitHub\\Portfolio\\Website\\Backend\\Portfolio-BE\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{67490E79-3B5E-4368-940B-9F84B0F20190}|Portfolio-BE\\Portfolio-BE.csproj|c:\\users\\andre\\documents\\github\\portfolio\\website\\backend\\portfolio-be\\portfolio-be\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{67490E79-3B5E-4368-940B-9F84B0F20190}|Portfolio-BE\\Portfolio-BE.csproj|solutionrelative:portfolio-be\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{60D60B90-0DD3-1648-188A-B0FBB137814B}|Portfolio-BE\\Portfolio-BE.csproj|c:\\users\\andre\\documents\\github\\portfolio\\website\\backend\\portfolio-be\\portfolio-be\\portfolio-be.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{60D60B90-0DD3-1648-188A-B0FBB137814B}|Portfolio-BE\\Portfolio-BE.csproj|solutionrelative:portfolio-be\\portfolio-be.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,28 +14,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "launchSettings.json",
-              "DocumentMoniker": "C:\\Users\\andre\\Documents\\GitHub\\Portfolio\\Website\\Backend\\Portfolio-BE\\Portfolio-BE\\Properties\\launchSettings.json",
-              "RelativeDocumentMoniker": "Portfolio-BE\\Properties\\launchSettings.json",
-              "ToolTip": "C:\\Users\\andre\\Documents\\GitHub\\Portfolio\\Website\\Backend\\Portfolio-BE\\Portfolio-BE\\Properties\\launchSettings.json",
-              "RelativeToolTip": "Portfolio-BE\\Properties\\launchSettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-06-03T22:58:59.384Z",
+              "Title": "Portfolio-BE",
+              "DocumentMoniker": "C:\\Users\\andre\\Documents\\GitHub\\Portfolio\\Website\\Backend\\Portfolio-BE\\Portfolio-BE\\Portfolio-BE.csproj",
+              "RelativeDocumentMoniker": "Portfolio-BE\\Portfolio-BE.csproj",
+              "ToolTip": "C:\\Users\\andre\\Documents\\GitHub\\Portfolio\\Website\\Backend\\Portfolio-BE\\Portfolio-BE\\Portfolio-BE.csproj",
+              "RelativeToolTip": "Portfolio-BE\\Portfolio-BE.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-06-04T00:33:03.778Z",
               "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
             }
           ]
         }
