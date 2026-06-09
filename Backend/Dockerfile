@@ -7,4 +7,4 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app/out .
-ENTRYPOINT ["dotnet", "Portfolio-BE.dll"]
+ENTRYPOINT ["dotnet", "Backend.dll"]

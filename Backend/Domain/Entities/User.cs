@@ -1,4 +1,4 @@
-﻿namespace Portfolio_BE.Domain.Entities;
+﻿namespace Domain.Entities;
 
 public class User
 {

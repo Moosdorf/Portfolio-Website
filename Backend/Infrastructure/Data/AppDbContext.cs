@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Portfolio_BE.Domain.Entities;
+using Domain.Entities;
 
-namespace Portfolio_BE.Infrastructure.Data;
+namespace Infrastructure.Data;
 
 public class AppDbContext : DbContext
 {

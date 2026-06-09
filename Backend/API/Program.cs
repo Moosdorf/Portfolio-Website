@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Portfolio_BE.Infrastructure.Data;
+using Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
