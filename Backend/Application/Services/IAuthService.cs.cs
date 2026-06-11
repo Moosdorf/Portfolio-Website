@@ -1,11 +1,13 @@
-﻿using Domain.Entities;
+﻿using Backend.Application.DTO.User;
+using Backend.Application.Responses;
+using Domain.Entities;
 
 namespace Backend.Application.Services
 {
     public interface IAuthService
     {
-        public String Hash(string message);
-        public Boolean VerifyPassword(string password, string storedHash);
+        public Task<UserResponse?> Register(CreateUserRequest createUserRequest);
+        public Task<LoginResponse?> VerifyPassword(LoginRequest loginRequest);
 
 
     }

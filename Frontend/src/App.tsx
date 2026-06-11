@@ -5,6 +5,7 @@ import Navbar from './components/Navbar.tsx';
 import Project from './pages/project.tsx';
 import Projects from './pages/projects.tsx';
 import Education from './pages/education.tsx';
+import Account from './pages/account.tsx';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/education" element={<Education />} />
           <Route path="/projects/:id" element={<Project />} />
+          <Route path="/account" element={<Account />} />
       </Routes>
     </BrowserRouter>
   )

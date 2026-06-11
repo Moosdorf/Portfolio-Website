@@ -35,6 +35,7 @@ function Navbar() {
             <ul className="hidden sm:flex gap-6">
               <li><Link to="/education" className="hover:text-gray-300">Education</Link></li>
               <li><Link to="/projects" className="hover:text-gray-300">Projects</Link></li>
+              <li><Link to="/account" className="hover:text-gray-300">Account</Link></li>
             </ul>
 
             {/* menu if too small screen for same links */}
@@ -50,9 +51,10 @@ function Navbar() {
 
           {/* the dropdown menu */}
           <div id="dropdown"className={`border border-gray-600 rounded-md w-35 bg-gray-500 sm:hidden ${toggleMenu ? 'block' : 'hidden'} absolute right-5 top-full z-50 -mt-4`}>
-            <ul className="py-2">
+            <ul className="py-2 p-1">
               <li onClick={() => setToggleMenu(false)}><Link to="/education" className="block py-1 hover:bg-gray-400 rounded">Education</Link></li>
               <li onClick={() => setToggleMenu(false)}><Link to="/projects" className="block py-1 hover:bg-gray-400 rounded">Projects</Link></li>
+              <li onClick={() => setToggleMenu(false)}><Link to="/account" className="block py-1 hover:bg-gray-400 rounded">Account</Link></li>
               </ul>
             </div>
         </nav>

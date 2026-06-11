@@ -17,7 +17,15 @@ public class AppDbContext : DbContext
         // creating the entity entry with its specifications
         // Entities must have "public int Id { get; set; }" as a variable, EF core makes this its PK and auto increments it.
         modelBuilder.Entity<User>()
-        .HasIndex(u => u.Username)
-        .IsUnique();
+            .HasIndex(u => u.Username)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.PasswordHash)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
     }
 }
