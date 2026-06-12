@@ -3,9 +3,21 @@ import { useState } from "react";
 export function useAuth() {
     const [fetchingData, setFetchingData] = useState(false);
     const [passwordWeak, setPasswordWeak] = useState(false);
+    const [emailTaken, setEmailTaken] = useState(false);
+    const [usernameTaken, setUsernameTaken] = useState(false);
+    const [loginSuccessful, setLoginSuccessful] = useState<null | true | false>(null); // null is no error, false is cannot log in, true = can log in
 
     const validatePassword = (password: string) => {
-        return password.length >= 8 && /\d/.test(password);
+        var passwordValidated = password.length >= 8 && /\d/.test(password)
+        setPasswordWeak(!passwordValidated);
+        return passwordValidated;
+    };
+
+    const resetErrors = () => {
+        setPasswordWeak(false);
+        setEmailTaken(false);
+        setUsernameTaken(false);
+        setLoginSuccessful(null);
     };
 
     const login = async (username: string, password: string) => {
@@ -16,6 +28,7 @@ export function useAuth() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
             });
+            setLoginSuccessful(response.ok)
             if (!response.ok) throw new Error(`Error: ${response.status}`);
         } catch (error) {
             console.error("Error:", error);
@@ -28,7 +41,7 @@ export function useAuth() {
         setFetchingData(true);
 
         if (!validatePassword(password)) {
-            setPasswordWeak(true);
+            setFetchingData(false);
             return;
         }
 
@@ -40,7 +53,15 @@ export function useAuth() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password, email })
             });
-            if (!response.ok) throw new Error(`Error: ${response.status}`);
+            if (!response.ok) {
+                const data = await response.json();
+                console.log(data.errors);
+                if (data.errors.email) setEmailTaken(true);
+                if (data.errors.username) setUsernameTaken(true);
+                throw new Error(`Error: ${response.status}`);
+            }
+            console.log(response);
+
         } catch (error) {
             console.error("Error:", error);
         } finally {
@@ -48,5 +69,5 @@ export function useAuth() {
         }
     };
 
-    return { login, register, fetchingData, passwordWeak, setPasswordWeak, validatePassword };
+    return { login, register, fetchingData, loginSuccessful, passwordWeak, resetErrors, validatePassword, emailTaken, setEmailTaken, usernameTaken, setUsernameTaken };
 }

@@ -2,13 +2,12 @@
 using Backend.Application.Responses;
 using Domain.Entities;
 
-namespace Backend.Application.Services
+namespace Backend.Application.Services;
+
+public interface IAuthService
 {
-    public interface IAuthService
-    {
-        public Task<UserResponse?> Register(CreateUserRequest createUserRequest);
-        public Task<LoginResponse?> VerifyPassword(LoginRequest loginRequest);
+    public Task<UserResponse?> Register(CreateUserRequest createUserRequest);
+    public Task<LoginResponse?> VerifyPassword(LoginRequest loginRequest);
 
 
-    }
 }

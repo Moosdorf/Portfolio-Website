@@ -8,16 +8,28 @@ namespace Backend.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(AuthService authService) : HomeController
+public class AuthController(AuthService authService, UserService userService) : HomeController
 {
     private readonly AuthService authService = authService;
+    private readonly UserService userService = userService;
 
     [HttpPost]
     [Route("new")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest createUserRequest)
     {
         var response = await authService.Register(createUserRequest);
-        if (response == null) return BadRequest("User cannot be created: Username or Email already exists");
+
+        if (response == null) {
+            // build a response with all the validation errors
+            if (userService.IsEmailInUse(createUserRequest.Email))
+                ModelState.AddModelError("email", "Email is already in use");
+
+            if (userService.GetByUsername(createUserRequest.Username) != null)
+                ModelState.AddModelError("username", "Username is already in use");
+
+            return ValidationProblem(); // sends a 400 bad request
+        }
+
         var token = authService.CreateJWT(createUserRequest.Username);
         SetJwtCookie(Response, token);
         return Created();
@@ -28,7 +40,7 @@ public class AuthController(AuthService authService) : HomeController
     public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
     {
         var response = await authService.VerifyPassword(loginRequest);
-        if (response == null) return BadRequest("User cannot be logged in: Username or Password incorrect");
+        if (!response.Successful) return BadRequest("User cannot be logged in: Username or Password incorrect");
         var token = authService.CreateJWT(loginRequest.Username);
         SetJwtCookie(Response, token);
         return Ok();
