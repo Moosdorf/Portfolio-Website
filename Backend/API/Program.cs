@@ -1,8 +1,11 @@
 using Backend.Application.Services;
 using Domain.Entities;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +16,7 @@ DotNetEnv.Env.Load(envPath);
 var db = Environment.GetEnvironmentVariable("POSTGRES_DB");
 var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
 var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
 
 var connectionString = $"Host=localhost;Port=5432;Database={db};Username={user};Password={password}";
 
@@ -33,15 +37,38 @@ builder.Services.AddCors(options => // https://learn.microsoft.com/en-us/aspnet/
     options.AddPolicy(name: "AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000").AllowAnyMethod()
+            policy.WithOrigins("https://localhost:3000").AllowAnyMethod()
                                                         .AllowAnyHeader()
                                                         .AllowCredentials();
         });
 });
 
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSecret!)
+            ),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                ctx.Token = ctx.Request.Cookies["access_token"]; 
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -49,7 +76,7 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseCors("AllowSpecificOrigin");
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

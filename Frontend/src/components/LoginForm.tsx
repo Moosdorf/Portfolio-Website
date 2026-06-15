@@ -12,7 +12,7 @@ type Props = {
 export function LoginForm({ onSwitch, fetchingPassword, validatePassword, passwordWeak, loginSuccessful, onSubmit }: Props) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-
+    
     return (
         <>
             {/* error message */}

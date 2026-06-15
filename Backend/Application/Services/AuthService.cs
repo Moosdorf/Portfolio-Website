@@ -48,19 +48,14 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponse?> VerifyPassword(LoginRequest loginRequest)
     {
-        Console.WriteLine("requested login username:" + loginRequest.Username);
         User user = await _context.Users
             .FirstOrDefaultAsync(u => u.Username == loginRequest.Username);
 
-        Console.WriteLine(user);
         if (user == null)
         {
-            Console.WriteLine("user null?");
             return new LoginResponse();
         }
-        Console.WriteLine("user found");
         var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
-        Console.WriteLine("results " + result.ToString());
         return new LoginResponse { Username = loginRequest.Username, Successful = result == PasswordVerificationResult.Success};
     }
 

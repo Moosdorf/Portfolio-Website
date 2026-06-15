@@ -10,7 +10,7 @@ import Account from './pages/account.tsx';
 function App() {
 
   return (
-    <BrowserRouter>
+    <>
       <Navbar />
       <Routes>
           <Route path="/" element={<Home />} />
@@ -19,7 +19,7 @@ function App() {
           <Route path="/projects/:id" element={<Project />} />
           <Route path="/account" element={<Account />} />
       </Routes>
-    </BrowserRouter>
+    </>
   )
 }
 

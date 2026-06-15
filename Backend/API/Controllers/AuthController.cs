@@ -2,7 +2,9 @@
 using Backend.Application.DTO.User;
 using Backend.Application.Responses;
 using Backend.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Backend.API.Controllers;
 
@@ -32,7 +34,7 @@ public class AuthController(AuthService authService, UserService userService) : 
 
         var token = authService.CreateJWT(createUserRequest.Username);
         SetJwtCookie(Response, token);
-        return Created();
+        return Created("", new { JWT = token });
     }
 
     [HttpPost]
@@ -43,7 +45,36 @@ public class AuthController(AuthService authService, UserService userService) : 
         if (!response.Successful) return BadRequest("User cannot be logged in: Username or Password incorrect");
         var token = authService.CreateJWT(loginRequest.Username);
         SetJwtCookie(Response, token);
+        return Ok(new { JWT = token});
+    }
+
+
+    [HttpPost]
+    [Authorize]
+    [Route("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var username = User.FindFirstValue(ClaimTypes.Name);
+        ClearJwtCookie(Response);
+
         return Ok();
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("me")]
+    public async Task<IActionResult> IsUserLoggedIn()
+    {
+        var username = User.FindFirstValue(ClaimTypes.Name);
+
+        Console.WriteLine("is user logged in: " + username);
+        var user = userService.GetByUsername(username);
+        return Ok(new
+        {
+            user.Id,
+            user.Username,
+            user.Email
+        });
     }
 
     [NonAction]
@@ -70,6 +101,7 @@ public class AuthController(AuthService authService, UserService userService) : 
             Secure = true,              // Only send cookie over HTTPS
             SameSite = SameSiteMode.None,
             Path = "/",                 // Cookie path scope
+            Domain = null,
             Expires = DateTimeOffset.UtcNow.AddHours(24) // Expiration time
         };
 
