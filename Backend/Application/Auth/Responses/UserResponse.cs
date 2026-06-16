@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Application.Responses;
+namespace Backend.Application.Auth.Responses;
 
 public class UserResponse
 {

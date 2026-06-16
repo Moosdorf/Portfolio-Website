@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260616011151_chess_Start")]
+    partial class chess_Start
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,34 +59,10 @@ namespace Backend.Migrations
 
                     b.HasIndex("WhiteId");
 
-                    b.ToTable("ChessGames");
+                    b.ToTable("chessGames");
                 });
 
-            modelBuilder.Entity("Backend.Domain.Entities.Project.Project", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.ToTable("Projects");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.Users.User", b =>
+            modelBuilder.Entity("Backend.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -122,13 +101,13 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Domain.Entities.Chess.Games.ChessGame", b =>
                 {
-                    b.HasOne("Backend.Domain.Entities.Users.User", "Black")
+                    b.HasOne("Backend.Domain.Entities.User", "Black")
                         .WithMany("GamesAsBlack")
                         .HasForeignKey("BlackId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Domain.Entities.Users.User", "White")
+                    b.HasOne("Backend.Domain.Entities.User", "White")
                         .WithMany("GamesAsWhite")
                         .HasForeignKey("WhiteId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -139,7 +118,7 @@ namespace Backend.Migrations
                     b.Navigation("White");
                 });
 
-            modelBuilder.Entity("Backend.Domain.Entities.Users.User", b =>
+            modelBuilder.Entity("Backend.Domain.Entities.User", b =>
                 {
                     b.Navigation("GamesAsBlack");
 

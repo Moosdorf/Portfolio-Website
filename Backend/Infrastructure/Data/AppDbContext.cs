@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Domain.Entities;
+﻿using Backend.Domain.Entities.Chess.Games;
+using Backend.Domain.Entities.Project;
+using Backend.Domain.Entities.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
@@ -8,6 +10,12 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     // db sets
     public DbSet<User> Users { get; set; }
+
+    // cheess
+    public DbSet<ChessGame> ChessGames { get; set; }
+
+    // projects
+    public DbSet<Project> Projects { get; set; }
 
 
 
@@ -27,5 +35,32 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+
+        /* --- CHESS --- */
+
+        // creating games
+        modelBuilder.Entity<ChessGame>()
+             .HasIndex(g => g.Id)
+             .IsUnique();
+
+        // player relations
+        modelBuilder.Entity<ChessGame>()
+            .HasOne(g => g.White)
+            .WithMany(w => w.GamesAsWhite)
+            .HasForeignKey(g => g.WhiteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ChessGame>()
+            .HasOne(g => g.Black)
+            .WithMany(w => w.GamesAsBlack)
+            .HasForeignKey(g => g.BlackId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
+        /* --- PROJECT --- */
+        modelBuilder.Entity<Project>()
+             .HasIndex(g => g.Id)
+             .IsUnique();
     }
 }

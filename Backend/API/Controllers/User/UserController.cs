@@ -1,11 +1,9 @@
 ﻿using API.Controllers;
-using Backend.Application.DTO.User;
-using Domain.Entities;
+using Backend.Application.General.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.API.Controllers;
+namespace Backend.API.Controllers.User;
 
 [ApiController]
 [Authorize]
@@ -16,4 +14,7 @@ public class UserController : HomeController
     // update user
     // delete user
     // get user
+    public UserController()
+    {
+    }
 }

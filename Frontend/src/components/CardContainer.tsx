@@ -1,16 +1,24 @@
+import type { CardData } from "../data/CardData";
 import Card from "./Card"
+type Props = {
+    projects: CardData[] | undefined;
+}
 
-function CardContainer() {
+
+function CardContainer({ projects }: Props) {
+    if (projects == undefined) return (<>error</>)
     return (
         <div className="card-container border border-gray-300 rounded-lg p-8
                         flex flex-col items-center gap-6
                         sm:flex-row sm:flex-wrap sm:justify-around">
-            <Card title="Project 1" description="Description of project 1" id={1}/>
-            <Card title="Project 1" description="Description of project 1" id={1}/>
-            <Card title="Project 1" description="Description of project 1" id={1}/>
-            <Card title="Project 1" description="Description of project 1" id={1}/>
-            <Card title="Project 2" description="Description of project 2" id={2}/>
-            <Card title="Project 3" description="Description of project 3" id={3}/>
+            {projects.map(project => (
+                <Card 
+                    key={project.id}
+                    id={project.id}
+                    title={project.title}
+                    description={project.description}
+                />
+            ))}
         </div>
     )
 }

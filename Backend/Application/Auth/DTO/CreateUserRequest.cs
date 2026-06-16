@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Application.DTO.User;
+namespace Backend.Application.Auth.DTO;
 
 public class CreateUserRequest
 {

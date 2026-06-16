@@ -1,8 +1,7 @@
-﻿using Backend.Application.DTO.User;
-using Backend.Application.Responses;
-using Domain.Entities;
+﻿using Backend.Application.Auth.DTO;
+using Backend.Application.Auth.Responses;
+using Backend.Domain.Entities.Users;
 using Infrastructure.Data;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +10,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Backend.Application.Services;
+
+namespace Backend.Application.Auth.Services;
 
 public class AuthService : IAuthService
 {

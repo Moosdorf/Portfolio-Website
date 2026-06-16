@@ -8,6 +8,8 @@ function Navbar() {
     const { amILoggedIn, user, logout } = useAuth(); 
     
     useEffect(() => {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      console.log("user prefers", (prefersDark) ? "dark mode" : "light mode")
       amILoggedIn();
     }, [])  
 

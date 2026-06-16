@@ -1,16 +1,17 @@
 ﻿using API.Controllers;
-using Backend.Application.DTO.User;
-using Backend.Application.Responses;
-using Backend.Application.Services;
+using Backend.Application.Auth.DTO;
+using Backend.Application.Auth.Services;
+using Backend.Application.General.Services;
+using Backend.Application.Users.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace Backend.API.Controllers;
+namespace Backend.API.Controllers.Auth;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(AuthService authService, UserService userService) : HomeController
+public class AuthController(AuthService authService, UserService userService) : HomeController()
 {
     private readonly AuthService authService = authService;
     private readonly UserService userService = userService;

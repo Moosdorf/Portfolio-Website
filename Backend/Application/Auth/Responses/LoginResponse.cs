@@ -1,4 +1,4 @@
-﻿namespace Backend.Application.Responses;
+﻿namespace Backend.Application.Auth.Responses;
 
 public class LoginResponse
 {

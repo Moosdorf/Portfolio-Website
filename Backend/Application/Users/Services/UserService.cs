@@ -1,8 +1,8 @@
-﻿using Domain.Entities;
+﻿using Backend.Domain.Entities.Users;
 using Infrastructure.Data;
-using Microsoft.AspNetCore.Identity;
 
-namespace Backend.Application.Services;
+namespace Backend.Application.Users.Services;
+
 
 public class UserService : IUserService
 {

@@ -1,8 +1,7 @@
-﻿using Backend.Application.DTO.User;
-using Backend.Application.Responses;
-using Domain.Entities;
+﻿using Backend.Application.Auth.DTO;
+using Backend.Application.Auth.Responses;
 
-namespace Backend.Application.Services;
+namespace Backend.Application.Auth.Services;
 
 public interface IAuthService
 {

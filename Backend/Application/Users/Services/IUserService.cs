@@ -1,6 +1,6 @@
-﻿using Domain.Entities;
+﻿using Backend.Domain.Entities.Users;
 
-namespace Backend.Application.Services;
+namespace Backend.Application.Users.Services;
 
 public interface IUserService
 {

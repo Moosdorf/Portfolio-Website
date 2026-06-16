@@ -1,5 +1,8 @@
-using Backend.Application.Services;
-using Domain.Entities;
+using Backend.Application.Auth.Services;
+using Backend.Application.Chess.Services;
+using Backend.Application.General.Services;
+using Backend.Application.Users.Services;
+using Backend.Domain.Entities.Users;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -20,12 +23,16 @@ var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
 
 var connectionString = $"Host=localhost;Port=5432;Database={db};Username={user};Password={password}";
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<GeneralService>();
+builder.Services.AddScoped<ChessService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddControllers();
@@ -43,7 +50,8 @@ builder.Services.AddCors(options => // https://learn.microsoft.com/en-us/aspnet/
         });
 });
 
-
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
@@ -72,7 +80,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
 
 
 app.UseCors("AllowSpecificOrigin");

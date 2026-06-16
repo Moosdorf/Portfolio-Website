@@ -1,6 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Backend.Domain.Entities.Chess.Games;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
-namespace Domain.Entities;
+namespace Backend.Domain.Entities.Users;
 
 public class User
 {
@@ -8,8 +10,14 @@ public class User
     [Required]
     public string Username { get; set; } = string.Empty; // unique
     [Required]
+    [JsonIgnore]
     public string PasswordHash { get; set; } = string.Empty;
     [Required]
     public string Email { get; set; } = string.Empty; // unique
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [JsonIgnore] // to avoid include loops
+    public List<ChessGame> GamesAsWhite { get; set; }
+    [JsonIgnore]
+    public List<ChessGame> GamesAsBlack { get; set; }
 }
