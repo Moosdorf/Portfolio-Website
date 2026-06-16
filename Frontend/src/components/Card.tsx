@@ -23,9 +23,10 @@ function Card(cardData: CardData) {
                     w-full sm:w-64
                     hover:border-blue-500
                     transition-all duration-300 ease-out"
+                    title={cardData.description}
         >
             <h2 className="text-white font-semibold text-lg mb-2 group-hover:text-blue-400 transition-colors duration-200">
-                {cardData.name}
+                {cardData.title}
             </h2>
 
             {showDescription && (
@@ -37,7 +38,7 @@ function Card(cardData: CardData) {
             <span className="inline-block mt-4 text-xs text-blue-400 font-medium tracking-wide uppercase">
                 View project →
             </span>
-</Link>
+        </Link>
     )
 }
 
