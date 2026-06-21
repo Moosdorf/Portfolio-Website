@@ -5,7 +5,7 @@ function Account() {
     const { user } = useAuth();
 
     return (
-        <div className="account-page text-black p-5 py-10">
+        <div className="account-page p-5 py-10">
             <h1>Account</h1>
             {!user && <LogInBox />}
             {user && <UserPage />}

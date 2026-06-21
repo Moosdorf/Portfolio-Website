@@ -11,10 +11,8 @@ function Projects() {
           method: "GET",
           headers: { "Content-Type": "application/json" },
       }).then(data => {
-        console.log(data)
         return data.json();
       }).then(raw => {
-        console.log(raw.result)
         setProjects(raw.result)
         setFetching(false);
       })

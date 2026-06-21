@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 
 
-function Project() {
-    let { id }= useParams(); // "id" must match the ":id" in the route path
-    const [project, setProject] = useState();
+function WebsiteProject() {
+    const [websiteProject, setProject] = useState();
     useEffect(() => {
-        fetch(`https://localhost:5270/api/projects/` + id, {
+        fetch(`https://localhost:5270/api/projects/1`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         }).then(data => {
@@ -18,14 +16,14 @@ function Project() {
         })
     }, [])
    
-    if (!project) return (<div>
+    if (!websiteProject) return (<div>
         <h1>Loading project...</h1>
     </div>)
     return (
         <div>
-            <h1>{project.title}</h1>
+            <h1>{websiteProject.title}</h1>
         </div>
     )
 }
 
-export default Project
+export default WebsiteProject

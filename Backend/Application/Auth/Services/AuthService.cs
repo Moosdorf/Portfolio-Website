@@ -30,6 +30,7 @@ public class AuthService : IAuthService
             Username = createUserRequest.Username,
             Email = createUserRequest.Email,
         };
+
         user.PasswordHash = _passwordHasher.HashPassword(user, createUserRequest.Password);
 
         _context.Users.Add(user);
@@ -55,6 +56,7 @@ public class AuthService : IAuthService
         {
             return new LoginResponse();
         }
+
         var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
         return new LoginResponse { Username = loginRequest.Username, Successful = result == PasswordVerificationResult.Success};
     }

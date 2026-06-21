@@ -28,7 +28,7 @@ export function CreateAccountForm({ onSwitch, onSubmit, fetchingData, passwordWe
                             setUsernameTaken(false);
                         }
                     }} className={`p-2 border rounded ${usernameTaken ? 'border-red-500' : ''}`} />
-            {usernameTaken && (<p className="text-red-500 text-sm">
+            {usernameTaken && (<p className="text-sm"> {/* create error class */}
                 Username is already taken.
                     </p>)}            
             
@@ -40,7 +40,7 @@ export function CreateAccountForm({ onSwitch, onSubmit, fetchingData, passwordWe
                         validatePassword(e.target.value);
                     }} className="p-2 border rounded" />
             {passwordWeak && (
-                <p className="text-red-500 text-sm m-3">
+                <p className="error text-sm m-3"> {/* create error class */}
                     Password must be at least 8 characters and contain a number.
                 </p>)}
             
@@ -54,7 +54,7 @@ export function CreateAccountForm({ onSwitch, onSubmit, fetchingData, passwordWe
                         setEmailTaken(false);
                     }
                 }} className={`p-2 border rounded ${emailTaken ? 'border-red-500' : ''}`} />
-            {emailTaken && (<p className="text-red-500 text-sm">
+            {emailTaken && (<p className="error text-sm"> {/* create error class */}
                 Email is already taken.
                     </p>
                 )}
@@ -62,11 +62,11 @@ export function CreateAccountForm({ onSwitch, onSubmit, fetchingData, passwordWe
 
             {/* buttons */}
             <button type="submit" onClick={() => onSubmit(username, password, email)}
-                className={`text-white p-2 rounded ${fetchingData ? "bg-green-400" : "bg-green-500 hover:bg-green-600"}`}>
+                className={`p-2 rounded ${fetchingData ? "bg-green-400" : "bg-green-500 hover:bg-green-600"}`}>
                 {fetchingData ? "Creating account..." : "Create Account"}
             </button>
             <button type="button" onClick={() => onSwitch()}
-                className="text-sm text-gray-600 hover:underline mx-auto">
+                className="text-sm hover:underline mx-auto">
                 Back
             </button>
         </>

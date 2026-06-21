@@ -35,7 +35,7 @@ function Navbar() {
 
     return (
       <>
-        <nav className="bg-gray-900 text-white px-6 py-4 relative">
+        <nav className="bg-gray-900 px-6 py-4 relative">
           <div className="flex items-center justify-between">
 
             {/* Logo */}
@@ -43,9 +43,9 @@ function Navbar() {
 
             {/* Nav links  ml-auto pushes them to the right */}
             <ul className="hidden sm:flex gap-6 items-center ml-auto mr-4">
-              <li><Link to="/education" className="hover:text-gray-300">Education</Link></li>
-              <li><Link to="/projects" className="hover:text-gray-300">Projects</Link></li>
-              <li><Link to="/account" className="hover:text-gray-300">Account</Link></li>
+              <li><Link to="/education" className="hover:text-gray-100">Education</Link></li>
+              <li><Link to="/projects" className="hover:text-gray-100">Projects</Link></li>
+              <li><Link to="/account" className="hover:text-gray-100">Account</Link></li>
             </ul>
 
             {/* Right side menu */}

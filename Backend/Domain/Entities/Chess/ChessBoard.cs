@@ -5,39 +5,51 @@ using HelperMethods;
 
 public class ChessBoard
 {
-    public Piece[][] GameBoard { get; private set; }
 
     // if it is whites turn then we must find moves for the black pieces first, these lists can be used for that.
+    public string Turn { get; set; } = "w"; // fen 1
+    public string Castling { get; set; } = "KQkq"; // fen 2
+    public string EnPassantSquare { get; set; } = "-"; // fen 3
+    public int HalfMoveNumber { get; set; } = 0; // fen 4
+    public int FullMoveClock { get; set; } = 0; // fen 5
+    public string FEN { get; set; } // total FEN
+
+
+    // extra info
+    public bool InCheck { get; set; } = false;
+    public King? CheckedKing { get; set; } = null;
+    public string LastMove { get; set; } = "";
+
+    // board information
+    public Piece[][] GameBoard { get; private set; }
+
+    // piece info
     public List<Piece> BlackPieces { get; private set; } = [];
     public List<Piece> WhitePieces { get; private set; } = [];
     public King BlackKing { get; private set; } = null!;
     public King WhiteKing { get; private set; } = null!;
-    public string EnPassantSquare { get; set; } = "-";
-    public string Castling { get; set; } = "KQkq";
-    public bool InCheck { get; set; } = false;
-    public King? CheckedKing { get; set; } = null;
+
     public List<string> Blockers { get; set; } = [];
-    public string Turn { get; set; } = "w";
-    public int HalfMoveNumber { get; set; } = 0;
-    public int FullMoveClock { get; set; } = 0;
-    public string LastMove { get; set; } = "";
 
 
     public ChessBoard() // used when the game starts initially
     {
         this.GameBoard = CreateGameBoard(); // creates game board with pieces in default position
-        InitializeInfo(); // set information like kings
+        InitializeInfo("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); // set information like kings
         FindAvailableMoves(); // find all moves for all pieces
+
     }
     public ChessBoard(string FEN) // list of moves already played, use this to catch up to the correct state
     {
         CreateChessState(FEN);
-        InitializeInfo();
+        InitializeInfo(FEN);
         FindAvailableMoves(); 
     }
 
-    private void InitializeInfo()
+    private void InitializeInfo(string FEN)
     {
+        this.FEN = FEN;
+
         // need a list of pieces (black and white)
         foreach (Piece piece in GameBoard.SelectMany(row => row))
         {

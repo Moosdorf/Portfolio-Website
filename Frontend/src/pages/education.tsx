@@ -1,6 +1,6 @@
 function Education() {
   return (
-    <div className="education-page text-left text-black p-5 py-10">
+    <div className="education-page text-left p-5 py-10">
       <h1>Education</h1>
       <h2>University: RUC</h2>
       <ul className="p-5">

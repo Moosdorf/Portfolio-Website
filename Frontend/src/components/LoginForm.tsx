@@ -16,7 +16,7 @@ export function LoginForm({ onSwitch, fetchingPassword, validatePassword, passwo
     return (
         <>
             {/* error message */}
-            {loginSuccessful === false && (<p className="text-red-500 text-sm">
+            {loginSuccessful === false && (<p className="error text-sm">
                 Username or password is incorrent.
             </p>)}
 
@@ -27,7 +27,7 @@ export function LoginForm({ onSwitch, fetchingPassword, validatePassword, passwo
 
             {/* password */}
             {passwordWeak && (
-                <p className="text-red-500 text-sm">
+                <p className="error text-sm">
                     Password must be at least 8 characters and contain a number.
                 </p>)}
             <input type="password" placeholder="Password" value={password}
@@ -40,12 +40,12 @@ export function LoginForm({ onSwitch, fetchingPassword, validatePassword, passwo
             {/* buttons */}
             <button type="button" disabled={fetchingPassword}
                 onClick={() => onSubmit(username, password)}
-                className={`text-white p-2 rounded ${fetchingPassword ? "bg-blue-400" : "bg-blue-500 hover:bg-blue-600"}`}>
+                className={`p-2 rounded ${fetchingPassword ? "bg-blue-400" : "bg-blue-500 hover:bg-blue-600"}`}>
                 {fetchingPassword ? "Logging in..." : "Log In"}
             </button>
 
             <button type="button" onClick={onSwitch}
-                className="text-sm text-gray-600 hover:underline mx-auto">
+                className="text-sm hover:underline mx-auto">
                 Back
             </button>
         </>

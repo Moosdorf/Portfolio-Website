@@ -25,11 +25,11 @@ public class AppDbContext : DbContext
         // creating the entity entry with its specifications
         // Entities must have "public int Id { get; set; }" as a variable, EF core makes this its PK and auto increments it.
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.Username)
-            .IsUnique();
+             .HasIndex(g => g.Id)
+             .IsUnique();
 
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.PasswordHash)
+            .HasIndex(u => u.Username)
             .IsUnique();
 
         modelBuilder.Entity<User>()
@@ -38,7 +38,6 @@ public class AppDbContext : DbContext
 
 
         /* --- CHESS --- */
-
         // creating games
         modelBuilder.Entity<ChessGame>()
              .HasIndex(g => g.Id)
