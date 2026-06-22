@@ -1,7 +1,6 @@
 ﻿using API.Controllers;
 using Backend.Application.Auth.DTO;
 using Backend.Application.Auth.Services;
-using Backend.Application.General.Services;
 using Backend.Application.Users.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,29 +10,29 @@ namespace Backend.API.Controllers.Auth;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(AuthService authService, UserService userService) : HomeController()
+public class AuthController(IAuthService authService, IUserService userService) : HomeController()
 {
-    private readonly AuthService authService = authService;
-    private readonly UserService userService = userService;
+    private readonly IAuthService _authService = authService;
+    private readonly IUserService _userService = userService;
 
     [HttpPost]
     [Route("new")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest createUserRequest)
     {
-        var response = await authService.Register(createUserRequest);
+        var response = await _authService.Register(createUserRequest);
 
         if (response == null) {
             // build a response with all the validation errors
-            if (userService.IsEmailInUse(createUserRequest.Email))
+            if (await _userService.IsEmailInUse(createUserRequest.Email) != null)
                 ModelState.AddModelError("email", "Email is already in use");
 
-            if (userService.GetByUsername(createUserRequest.Username) != null)
+            if (await _userService.GetByUsername(createUserRequest.Username) != null)
                 ModelState.AddModelError("username", "Username is already in use");
 
             return ValidationProblem(); // sends a 400 bad request
         }
 
-        var token = authService.CreateJWT(createUserRequest.Username);
+        var token = _authService.CreateJWT(createUserRequest.Username);
         SetJwtCookie(Response, token);
         return Created("", new { JWT = token });
     }
@@ -42,9 +41,9 @@ public class AuthController(AuthService authService, UserService userService) : 
     [Route("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
     {
-        var response = await authService.VerifyPassword(loginRequest);
+        var response = await _authService.VerifyPassword(loginRequest);
         if (!response.Successful) return BadRequest("User cannot be logged in: Username or Password incorrect");
-        var token = authService.CreateJWT(loginRequest.Username);
+        var token = _authService.CreateJWT(loginRequest.Username);
         SetJwtCookie(Response, token);
         return Ok(new { JWT = token});
     }
@@ -69,7 +68,7 @@ public class AuthController(AuthService authService, UserService userService) : 
         var username = User.FindFirstValue(ClaimTypes.Name);
 
         Console.WriteLine("is user logged in: " + username);
-        var user = userService.GetByUsername(username);
+        var user = await _userService.GetByUsername(username);
         return Ok(new
         {
             user.Id,
@@ -109,7 +108,4 @@ public class AuthController(AuthService authService, UserService userService) : 
         response.Cookies.Append("access_token", token, cookieOptions);
     }
 
-    // log in user
-    // logout?
-    // refresh JWT
 }

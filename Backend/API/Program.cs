@@ -29,10 +29,12 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<GeneralService>();
-builder.Services.AddScoped<ChessService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGeneralService, GeneralService>();
+builder.Services.AddScoped<IChessDataService, ChessDataService>();
+builder.Services.AddScoped<IStockFishService, StockFishService>();
+builder.Services.AddScoped<IPuzzleDataService, PuzzleDataService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddControllers();

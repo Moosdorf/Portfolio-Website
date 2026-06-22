@@ -1,26 +1,131 @@
+/* ============================== */
+/* Layout                          */
+/* ============================== */
+
+.board-layout {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;   
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.info-panel,
+.fake-info-panel {
+  flex: 1 1 auto;
+  max-width: 280px;          
+  min-width: 100px;
+  box-sizing: border-box;
+}
+
+.info-panel {
+  background: #1e1e1e;
+  color: white;
+  padding: 1rem;
+}
+
 .wrapper {
+  flex: 0 0 70vh;
   display: flex;
   justify-content: center;
-  margin: 0 auto;
   position: relative;
   overflow: hidden;
-  max-width: 70vh;
 }
 
-.wrapper::before {
+/* ============================== */
+/* History Box                    */
+/* ============================== */
+
+.move-history {
+  max-height: 210px;
+  overflow-y: auto;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(226, 179, 58, 0.15);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(226, 179, 58, 0.4) transparent;
+}
+
+.move-history::-webkit-scrollbar { width: 6px; }
+.move-history::-webkit-scrollbar-thumb {
+  background: rgba(226, 179, 58, 0.4);
+  border-radius: 3px;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr;
+  padding: 6px 10px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.history-row.header {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: inherit;
+}
+
+.history-row:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.history-row:hover {
+  background-color: rgba(226, 179, 58, 0.12);
+  cursor: pointer;
+}
+
+.history-row.current {
+  background-color: rgba(226, 179, 58, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(226, 179, 58, 0.45);
+}
+
+.move-number {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ============================== */
+/* Login Overlay                   */
+/* ============================== */
+
+.board-overlay {
   position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(1.45px);
+  z-index: 10;
 }
 
+.overlay-link {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
 
+.overlay-link:hover {
+  color: rgb(121, 121, 121);
+}
 
-.overlay-rank, 
+.overlay-rank,
 .overlay-file {
   position: absolute;
   color: black;
   font-size: 0.8rem;
   padding: 0.1rem 0.3rem;
   border-radius: 2px;
-  pointer-events: none; 
+  pointer-events: none;
 }
 
 .overlay-rank {
@@ -29,13 +134,15 @@
   text-align: right;
 }
 
-
-
 .overlay-file {
   bottom: 2px;
   left: 2px;
   text-align: left;
 }
+
+/* ============================== */
+/* Board                           */
+/* ============================== */
 
 .chessboardDisplay {
   width: 150px;
@@ -56,7 +163,7 @@
   width: 100%;
   aspect-ratio: 1;
   user-select: none;
-  border-radius: 11px; 
+  border-radius: 11px;
   overflow: hidden;
   background: #f0d9b5;
 }
@@ -69,11 +176,14 @@
   border: 1px solid transparent;
   pointer-events: none;
   z-index: 3;
-  box-shadow: 
+  box-shadow:
     inset 0 0 0 1px rgba(101, 81, 28, 0.3),
     inset 0 0 10px rgba(101, 81, 28, 0.2);
 }
 
+/* ============================== */
+/* Squares                         */
+/* ============================== */
 
 .square {
   position: relative;
@@ -95,6 +205,10 @@
   border: 1px solid rgba(101, 81, 28, 0.1);
 }
 
+/* ============================== */
+/* Pieces                          */
+/* ============================== */
+
 .piece {
   position: absolute;
   top: 50%;
@@ -103,10 +217,10 @@
   height: 82%;
   transform: translate(-50%, -50%);
   object-fit: contain;
-  filter: 
-    drop-shadow(2px 3px 3px rgba(0,0,0,0.4))
+  filter:
+    drop-shadow(2px 3px 3px rgba(0, 0, 0, 0.4))
     brightness(1.03);
-  transition: 
+  transition:
     transform 0.15s ease,
     filter 0.15s ease;
   z-index: 2;
@@ -115,18 +229,23 @@
 
 .currentTurn:hover {
   transform: translate(-50%, -50%) scale(1.08);
-  filter: 
-    drop-shadow(3px 5px 5px rgba(0,0,0,0.5))
+  filter:
+    drop-shadow(3px 5px 5px rgba(0, 0, 0, 0.5))
     brightness(1.08);
 }
 
-.move, .target {
+/* ============================== */
+/* Move Indicators                 */
+/* ============================== */
+
+.move,
+.target {
   position: absolute;
-  border-radius: 50%;
-  height: 28%;
-  width: 28%;
   top: 50%;
   left: 50%;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
 }
@@ -143,6 +262,10 @@
   box-shadow: 0 0 8px rgba(255, 60, 60, 0.3);
 }
 
+/* ============================== */
+/* Square States                   */
+/* ============================== */
+
 .selected {
   position: relative;
 }
@@ -155,16 +278,6 @@
   border: 2px solid rgba(226, 179, 58, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
-}
-
-
-.historyWhite {
-  background-color: rgba(255, 255, 255, 0.594);       
-  width: 100%;                  
-  padding: 0.25rem 0.5rem;      
-  box-sizing: border-box;       
-  text-align: right;            
-  display: block;               
 }
 
 .movedTo {
@@ -187,6 +300,7 @@
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
 }
+
 .checkmate {
   background: rgba(187, 17, 17, 0.463) !important;
   border: 2px solid rgba(150, 40, 40, 0.7);
@@ -194,16 +308,33 @@
   z-index: 3;
 }
 
+/* ============================== */
+/* Move History                    */
+/* ============================== */
+
+.historyWhite {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  box-sizing: border-box;
+  text-align: right;
+  background-color: rgba(255, 255, 255, 0.594);
+}
+
+/* ============================== */
+/* Responsive                      */
+/* ============================== */
+
 @media (max-width: 768px) {
   .wrapper {
     padding: 12px;
     margin: 1rem auto;
-    box-shadow: 
-      inset 0 -10px 20px rgba(0,0,0,0.5),
+    box-shadow:
+      inset 0 -10px 20px rgba(0, 0, 0, 0.5),
       inset 0 10px 15px rgba(226, 179, 58, 0.1),
-      0 5px 15px rgba(0,0,0,0.4);
+      0 5px 15px rgba(0, 0, 0, 0.4);
   }
-  
+
   .piece {
     width: 85%;
     height: 85%;

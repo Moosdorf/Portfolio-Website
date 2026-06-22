@@ -13,11 +13,12 @@ public class AppDbContext : DbContext
 
     // cheess
     public DbSet<ChessGame> ChessGames { get; set; }
+    public DbSet<Move> Moves { get; set; }
+    public DbSet<Puzzle> Puzzles { get; set; }
+
 
     // projects
     public DbSet<Project> Projects { get; set; }
-
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,15 +46,15 @@ public class AppDbContext : DbContext
 
         // player relations
         modelBuilder.Entity<ChessGame>()
-            .HasOne(g => g.White)
-            .WithMany(w => w.GamesAsWhite)
-            .HasForeignKey(g => g.WhiteId)
+            .HasOne(game => game.WhitePlayer)
+            .WithMany(user => user.GamesAsWhite)
+            .HasForeignKey(game => game.BlackId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<ChessGame>()
-            .HasOne(g => g.Black)
-            .WithMany(w => w.GamesAsBlack)
-            .HasForeignKey(g => g.BlackId)
+            .HasOne(game => game.BlackPlayer)
+            .WithMany(user => user.GamesAsBlack)
+            .HasForeignKey(game => game.BlackId)
             .OnDelete(DeleteBehavior.Restrict);
 
 

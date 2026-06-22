@@ -7,6 +7,6 @@ public interface IAuthService
 {
     public Task<UserResponse?> Register(CreateUserRequest createUserRequest);
     public Task<LoginResponse?> VerifyPassword(LoginRequest loginRequest);
-
+    public string CreateJWT(string username);
 
 }

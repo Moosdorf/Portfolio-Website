@@ -5,7 +5,7 @@ namespace Backend.Application.Users.Services;
 public interface IUserService
 {
     public User GetById(int id);
-    public User GetByUsername(string username);
-    public bool IsEmailInUse(string email);
+    public Task<User> GetByUsername(string username);
+    public Task<User> IsEmailInUse(string email);
 
 }

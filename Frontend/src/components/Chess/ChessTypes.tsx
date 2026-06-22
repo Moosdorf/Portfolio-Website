@@ -23,7 +23,7 @@ export const PieceType = {
 
 export type PieceType = (typeof PieceType)[keyof typeof PieceType];
 
-/* promotions */
+// --- promotions ------------------------------------------------------------
 export const PromotionType = {
   Knight: 2,
   Bishop: 3,
@@ -43,6 +43,18 @@ export type PromotionInformation = {
     to: ChessPiece,
     promotion: PromotionType
 };
+
+
+// --- game modes ------------------------------------------------------------
+export const ChessGameMode = {
+  None: "None",
+  Multiplayer: "Multiplayer",
+  Bot: "Bot",
+  Puzzle: "Puzzle",
+  Freeplay: "Freeplay"
+} as const;
+
+export type ChessGameMode = (typeof ChessGameMode)[keyof typeof ChessGameMode];
 
 
 // --- Pieces ------------------------------------------------------------
@@ -82,11 +94,11 @@ export interface ChessBoard {
 export interface ChessUser {
   id: number;
   username: string;
-  white: boolean;
+  color: Color;
 }
 
 export interface ChessGame {
-  id: number;
+  gameId: number;
   white: ChessUser;
   whiteId: number;
   black: ChessUser;

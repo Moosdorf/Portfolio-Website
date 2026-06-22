@@ -1,24 +1,33 @@
 ﻿using Backend.Domain.Entities.Users;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Domain.Entities.Chess.Games;
+public enum GameType
+{
+    Bot,
+    Multiplayer
+}
+
+public enum GameResult
+{
+    WhiteWin,
+    BlackWin,
+    Draw,
+    Ongoing
+}
 
 public class ChessGame
 {
     public int Id { get; set; }
-    [Required]
-    public User White {  get; set; }
-    public int WhiteId {  get; set; }
-    [Required]
-    public User Black { get; set; }
-    public int BlackId { get; set; }
-    public int Moves { get; set; } = 0;
-    public List<string> FenList { get; set; } = new List<string>();
-    public DateTime GameStarted { get; set; } = DateTime.UtcNow;
-    public string CurrentState { get; set; } = "";
+    public GameType GameType { get; set; }
 
-    public ChessBoard ChessBoard => FenList.Count > 0
-        ? new ChessBoard(FEN: FenList.Last())
-        : new ChessBoard();
+    public int WhiteId { get; set; }
+    public string WhiteUsername { get; set; } 
+    public User WhitePlayer { get; set; } = null!; // remove null when ready
+    public int BlackId { get; set; }
+    public string BlackUsername { get; set; }
+    public User BlackPlayer { get; set; } = null!;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public List<Move> Moves { get; set; } = []; 
+    public GameResult Result { get; set; } = GameResult.Ongoing;
 }

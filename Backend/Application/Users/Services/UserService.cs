@@ -17,14 +17,13 @@ public class UserService : IUserService
         return _context.Users.FirstOrDefault(u => u.Id == id);
     }
 
-    public User GetByUsername(string username)
+    public async Task<User> GetByUsername(string username)
     {
         return _context.Users.FirstOrDefault(u => u.Username == username);
     }
 
-    public bool IsEmailInUse(string email)
+    public async Task<User> IsEmailInUse(string email)
     {
-        User user = _context.Users.FirstOrDefault(u => u.Email == email);
-        return user != null;
+        return _context.Users.FirstOrDefault(u => u.Email == email);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Backend.Domain.Entities.Chess;
+﻿using Backend.Application.Chess.DTO;
+using Backend.Domain.Entities.Chess;
 
 
 namespace HelperMethods;
@@ -148,7 +149,7 @@ public static class ChessMethods
     /// Executes a move on the chessboard, updating the chessState accordingly.
     /// Handles promotions, en passant, castling, and updating FEN related state.
     /// </summary>
-    public static void MakeMove(ChessBoard chessState, ChessMove move)
+    public static void MakeMove(ChessBoard chessState, MoveModel move)
     {
 
         var (fRow, fCol, tRow, tCol) = ConvertMoveToColRow(move.Move); // find indexes from the move

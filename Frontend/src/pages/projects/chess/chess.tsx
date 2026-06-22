@@ -2,15 +2,9 @@ import { useEffect, useState } from "react";
 import { Button } from "../../../components/Button";
 import ChessBoard from "../../../components/Chess/ChessBoard";
 import ChessBoardDisplay from "../../../components/Chess/ChessBoardDisplay";
+import { ChessGameMode } from "../../../components/Chess/ChessTypes";
 
-const ChessGameMode = {
-  None: "None",
-  Multiplayer: "Multiplayer",
-  Bot: "Bot",
-  Puzzle: "Puzzle",
-} as const;
 
-type ChessGameMode = (typeof ChessGameMode)[keyof typeof ChessGameMode];
 
 export type Project = {
     title: string,
@@ -50,6 +44,7 @@ function ChessProject() {
                         <Button onClick={() => setGameMode(ChessGameMode.Multiplayer)}>Multiplayer game</Button>
                         <Button onClick={() => setGameMode(ChessGameMode.Bot)}>Bot game</Button>
                         <Button onClick={() => setGameMode(ChessGameMode.Puzzle)}>Solve puzzles</Button>
+                        <Button onClick={() => setGameMode(ChessGameMode.Freeplay)}>Freeplay</Button>
                     </div>
                 </div>
             )
@@ -58,8 +53,8 @@ function ChessProject() {
         case ChessGameMode.Multiplayer: {
             return (
                 <div>
-                    <ChessBoard>
-                        <ChessBoardDisplay key={"multiplayer"}/>
+                    <ChessBoard gameMode={ChessGameMode.Multiplayer}>
+                        <ChessBoardDisplay gameMode={ChessGameMode.Multiplayer} key={"multiplayer"}/>
                     </ChessBoard>
                 </div>
             )
@@ -68,8 +63,8 @@ function ChessProject() {
         case ChessGameMode.Bot: {   
             return (
                 <div>
-                    <ChessBoard>
-                        <ChessBoardDisplay key={"bot"}/>
+                    <ChessBoard gameMode={ChessGameMode.Bot}>
+                        <ChessBoardDisplay gameMode={ChessGameMode.Bot} key={"bot"}/>
                     </ChessBoard>
                 </div>
             )
@@ -78,8 +73,18 @@ function ChessProject() {
         case ChessGameMode.Puzzle: {
             return (
                 <div>
-                    <ChessBoard>
-                        <ChessBoardDisplay key={"puzzle"}/>
+                    <ChessBoard gameMode={ChessGameMode.Puzzle}>
+                        <ChessBoardDisplay gameMode={ChessGameMode.Puzzle} key={"puzzle"}/>
+                    </ChessBoard>
+                </div>
+            )
+        }
+
+        case ChessGameMode.Freeplay: {
+            return (
+                <div>
+                    <ChessBoard gameMode={ChessGameMode.Freeplay}>
+                        <ChessBoardDisplay gameMode={ChessGameMode.Freeplay} key={"freeplay"}/>
                     </ChessBoard>
                 </div>
             )

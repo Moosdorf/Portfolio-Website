@@ -3,7 +3,7 @@ import { useChessBoard } from './ChessBoard';
 import { PieceType, PromotionType, type ChessPiece, type PromotionSquare } from './ChessTypes';
 
 function PieceDisplay({ piece }: { piece: ChessPiece }) {
-    const { chessGame, selectedPiece, setSelectedPiece, promotionInfo, setPromotionInfo, activePlayer } = useChessBoard()
+    const { chessGame, selectedPiece, setSelectedPiece, promotionInfo, setPromotionInfo, activePlayer, attack } = useChessBoard()
     const { user } = useAuth();
 
     const color = piece.isWhite ? "white" : "black";
@@ -47,6 +47,7 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
     };
 
     const onDrop = (piece: ChessPiece) => {
+        console.log(`Dropping ${selectedPiece?.position} on ${piece.position}`)
         if (selectedPiece == null || CheckForPromotion(piece)) return;
 
         if (piece === selectedPiece) {
@@ -55,11 +56,14 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
         }
         if (selectedPiece.availableMoves.includes(piece.position) || selectedPiece.availableCaptures.includes(piece.position)) {
             attack(piece);
+            removeSelected();
+
         }
         return;
     };
 
     const handleOnClick = (clickedPiece: ChessPiece) => {
+        console.log(clickedPiece)
         if (promotionInfo || chessGame?.gameDone) return;
         if (CheckForPromotion(clickedPiece)) return;
 
@@ -69,10 +73,12 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
         }
 
         if (clickedPiece !== selectedPiece) {
-            addSelected(clickedPiece);
+            // if selected piece belongs to the active player, select it instead, else "attack" the square. 
+            if (clickedPiece.isWhite === clickedPiece.isWhite) addSelected(clickedPiece);
             if (selectedPiece.availableMoves.includes(clickedPiece.position) ||
                 selectedPiece.availableCaptures.includes(clickedPiece.position)) {
                 attack(clickedPiece);
+                removeSelected();
             }
             return;
         }
@@ -83,17 +89,15 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
     const whitesTurn = chessGame?.chessBoard.turn === "w";
 
     const addSelected = (selectedPiece: ChessPiece) => {
-        if (selectedPiece.isWhite === (whitesTurn) && selectedPiece.type !== PieceType.Empty) setSelectedPiece(selectedPiece);
+        if (selectedPiece.isWhite === (whitesTurn) && selectedPiece.type !== PieceType.Empty) {
+            setSelectedPiece(selectedPiece);
+        }
         else setSelectedPiece(null);
     };
 
     const removeSelected = () => {
         setSelectedPiece(null);
     };
-
-    const attack = (clickedPiece: ChessPiece) => {
-        removeSelected();
-    }
 
     const CheckForPromotion = (clickedPiece: ChessPiece) => {
         if (selectedPiece === null || selectedPiece.type !== PieceType.Pawn) return false;
@@ -126,7 +130,8 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
         return false;
     }
 
-    const pieceClass = `piece ${(activePlayer?.id == user.id && piece.isWhite === activePlayer?.white) ? "currentTurn" : ""}`;
+
+    const pieceClass = `piece ${(user && activePlayer?.id == user.id && piece.isWhite === (activePlayer?.color === "w")) ? "currentTurn" : ""}`;
 
     const reversed = false;
 
@@ -153,8 +158,8 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
             {isTarget && <div className='target'></div>}
             {isMove && <div className='move'></div>}
 
-            {piece.position[0] === "h" && <div className='overlay-rank'>{piece.position[1]}</div>}
-            {piece.position[1] === ((!reversed) ? "8" : "1") && <div className='overlay-file'>{piece.position[0]}</div>}
+            {user && piece.position[0] === "h" && <div className='overlay-rank'>{piece.position[1]}</div>}
+            {user && piece.position[1] === ((!reversed) ? "8" : "1") && <div className='overlay-file'>{piece.position[0]}</div>}
         </div>
     );
 }

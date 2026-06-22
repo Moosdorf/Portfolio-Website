@@ -1,4 +1,5 @@
-﻿using Backend.Domain.Entities.Chess;
+﻿using Backend.Application.Chess.DTO;
+using Backend.Domain.Entities.Chess;
 using HelperMethods;
 
 
@@ -72,7 +73,7 @@ public class ChessBoard
     }
 
 
-    public bool Move(ChessMove moveModel)
+    public bool Move(MoveModel moveModel)
     {
         var move = moveModel.Move;
 
