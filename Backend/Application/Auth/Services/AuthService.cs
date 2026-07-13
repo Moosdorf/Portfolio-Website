@@ -49,16 +49,23 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponse?> VerifyPassword(LoginRequest loginRequest)
     {
-        User user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == loginRequest.Username);
-
-        if (user == null)
+        try
         {
-            return new LoginResponse();
+            User user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == loginRequest.Username);
+
+            if (user == null)
+            {
+                return new LoginResponse();
+            }
+
+            var loginSuccess = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password) == PasswordVerificationResult.Success;
+            return new LoginResponse { Username = loginRequest.Username, Successful = loginSuccess, Error = (loginSuccess) ? "" : "Login"};
+        } catch(Exception e)
+        {
+            return new LoginResponse { Username = loginRequest.Username, Successful = false, Error = "Server" };
         }
 
-        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
-        return new LoginResponse { Username = loginRequest.Username, Successful = result == PasswordVerificationResult.Success};
     }
 
     public string CreateJWT(string username)

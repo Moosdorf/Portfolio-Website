@@ -7,7 +7,7 @@ namespace Backend.Application.Chess.Services;
 
 public interface IChessDataService
 {
-    Task<(ChessGame, ChessBoard)> CreateGameAsync(string userName1, string userName2);
+    Task<(ChessGame, ChessBoard)> CreateGameAsync(CreateChessModel createChessModel);
     Task<(ChessGame, ChessBoard)> CreateBotGameAsync(string userName1, bool white);
     Task<ChessGame?> EndGame(int chessId, GameResult result);
 

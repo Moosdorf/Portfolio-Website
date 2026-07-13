@@ -42,7 +42,12 @@ public class AuthController(IAuthService authService, IUserService userService) 
     public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
     {
         var response = await _authService.VerifyPassword(loginRequest);
-        if (!response.Successful) return BadRequest("User cannot be logged in: Username or Password incorrect");
+        if (!response.Successful) { 
+            if (response.Error == "Login")
+                return BadRequest("User cannot be logged in: Username or Password incorrect");
+            if (response.Error == "Server")
+                return BadRequest("Server is not responding");
+        }
         var token = _authService.CreateJWT(loginRequest.Username);
         SetJwtCookie(Response, token);
         return Ok(new { JWT = token});

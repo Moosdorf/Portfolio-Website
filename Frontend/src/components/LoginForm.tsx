@@ -5,19 +5,23 @@ type Props = {
     fetchingPassword: boolean;
     passwordWeak: boolean;
     loginSuccessful: null | boolean;
+    errorMessage: string;
     onSubmit: (username: string, password: string) => void;
     validatePassword: (password: string) => boolean;
 }
 
-export function LoginForm({ onSwitch, fetchingPassword, validatePassword, passwordWeak, loginSuccessful, onSubmit }: Props) {
+export function LoginForm({ onSwitch, fetchingPassword, validatePassword, passwordWeak, loginSuccessful, onSubmit, errorMessage }: Props) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     
     return (
         <>
             {/* error message */}
-            {loginSuccessful === false && (<p className="error text-sm">
-                Username or password is incorrent.
+            {errorMessage == "Login" && loginSuccessful === false && (<p className="error text-sm">
+                 Username or password is incorrect.
+            </p>)}
+            {errorMessage == "Server" && loginSuccessful === false && (<p className="error text-sm">
+                Server did not respond.
             </p>)}
 
             {/* username */}

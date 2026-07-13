@@ -56,59 +56,77 @@ export const ChessGameMode = {
 
 export type ChessGameMode = (typeof ChessGameMode)[keyof typeof ChessGameMode];
 
+export type Project = {
+    title: string,
+    description: string,
+    id: number
+}
+
+export type SelectedGameOptions = {
+    GameMode: ChessGameMode,
+    SelectedColor: string,
+    Username: string
+}
 
 // --- Pieces ------------------------------------------------------------
 export interface ChessPiece {
-  type: PieceType;
-  position: Square;
-  isWhite: boolean;
-  pinned: boolean;
-  pinnedSquares: Square[];
-  availableMoves: Square[];
-  availableCaptures: Square[];
-  attackers: Square[];
-  defenders: Square[];
+  Type: PieceType;
+  Position: Square;
+  IsWhite: boolean;
+  Pinned: boolean;
+  PinnedSquares: Square[];
+  AvailableMoves: Square[];
+  AvailableCaptures: Square[];
+  Attackers: Square[];
+  Defenders: Square[];
 }
 
 // --- Board -----------------------------------------------------------
 export interface ChessBoard {
-  turn: Color;
-  castling: string; // e.g. "KQkq", or "-" once all rights are lost
-  enPassantSquare: Square; // "-" when not applicable
-  halfMoveNumber: number;
-  fullMoveClock: number;
-  fen: string;
-  inCheck: boolean;
-  checkedKing: ChessPiece | null;
-  lastMove: string;
+  Turn: Color;
+  Castling: string; // e.g. "KQkq", or "-" once all rights are lost
+  EnPassantSquare: Square; // "-" when not applicable
+  HalfMoveNumber: number;
+  FullMoveClock: number;
+  FEN: string;
+
+  InCheck: boolean;
+  CheckedKing: ChessPiece | null;
+  LastMove: string;
+  CheckMate: boolean;
+  Winner: string | null;
+
   /** 8x8 grid, [rank][file] */
-  gameBoard: ChessPiece[][];
-  blackPieces: ChessPiece[];
-  whitePieces: ChessPiece[];
-  blackKing: ChessPiece;
-  whiteKing: ChessPiece;
-  blockers: Square[];
+  GameBoard: ChessPiece[][];
+  BlackPieces: ChessPiece[];
+  WhitePieces: ChessPiece[];
+  BlackKing: ChessPiece;
+  WhiteKing: ChessPiece;
+  Blockers: Square[];
 }
 
 // --- Users & game wrapper ---------------------------------------------
-export interface ChessUser {
-  id: number;
-  username: string;
-  color: Color;
+export interface ChessMove {
+  ChessGameId: number;
+  MoveString: string;
+  FEN: string;
 }
 
+
 export interface ChessGame {
-  gameId: number;
-  white: ChessUser;
-  whiteId: number;
-  black: ChessUser;
-  blackId: number;
-  moves: number;
-  fenList: string[];
-  gameStarted: string; // ISO 8601 timestamp
-  currentState: string;
-  chessBoard: ChessBoard;
-  gameDone: boolean;
+  Id: number;
+  SessionId: string;
+
+  ChessBoard: ChessBoard;
+
+  GameType: number;
+
+  Players: string[];
+
+  Moves: ChessMove[];
+  FenList: string[];
+
+  GameStarted: string; // ISO 8601 timestamp
 }
 
 

@@ -13,7 +13,8 @@ function Projects() {
       }).then(data => {
         return data.json();
       }).then(raw => {
-        setProjects(raw.result)
+        console.log(raw)
+        setProjects(raw)
         setFetching(false);
       })
 

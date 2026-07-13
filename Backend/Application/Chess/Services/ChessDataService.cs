@@ -20,38 +20,39 @@ public class ChessDataService : IChessDataService
 
 
 
-    public async Task<(ChessGame, ChessBoard)> CreateGameAsync(string userName1, string userName2)
+    public async Task<(ChessGame, ChessBoard)> CreateGameAsync(CreateChessModel createChessModel)
     {
-        var player1 = await _dataService.GetByUsername(userName1);
-        var player2 = await _dataService.GetByUsername(userName2);
+        var white = await _dataService.GetById(createChessModel.WhiteId);
+        var black = await _dataService.GetById(createChessModel.BlackId);
 
-       if (player1 == null && player2 == null)
+       if (white == null && black == null)
        {
             Console.WriteLine("players null");
             return (null, null);
        }
 
 
-        var chessBoard = new ChessBoard();
         var dbEntryChessGame = new ChessGame()
         {
-            WhiteUsername = player1.Username,
-            BlackUsername = player2.Username,
-            WhitePlayer = player1,
-            BlackPlayer = player2,
-            GameType = GameType.Multiplayer
+            WhiteUsername = white.Username,
+            BlackUsername = black.Username,
+            WhitePlayer = white,
+            BlackPlayer = black,
+            GameType = createChessModel.GameMode,
         };
+        var chessBoard = new ChessBoard();
+
+
 
         _db.ChessGames.Add(dbEntryChessGame);
         await _db.SaveChangesAsync();
         return (dbEntryChessGame, chessBoard);
     }
 
-    public async Task<(ChessGame, ChessBoard)> CreateBotGameAsync(string userName1, bool white)
+    public async Task<(ChessGame, ChessBoard)> CreateBotGameAsync(string user, bool white)
     {
-        var player1 = await _dataService.GetByUsername(userName1);
+        var player1 = await _dataService.GetByUsername(user);
         var botPlayer = await _dataService.GetByUsername("stockfish");
-        // if (player1 == null) return (null, null);
 
         var chessBoard = new ChessBoard();
         var dbEntryChessGame = new ChessGame()
@@ -62,8 +63,7 @@ public class ChessDataService : IChessDataService
             BlackPlayer = (!white) ? player1 : botPlayer,
             WhiteUsername = (white) ? player1.Username : botPlayer.Username,
             BlackUsername = (!white) ? player1.Username : botPlayer.Username,
-
-            GameType = GameType.Bot
+            GameType = "Bot"
         };
 
         _db.ChessGames.Add(dbEntryChessGame);
@@ -111,6 +111,9 @@ public class ChessDataService : IChessDataService
 
         bool availableMoves = pieces.Any(x => x.AvailableMoves.Count > 0 || x.AvailableCaptures.Count > 0);
 
+        
+        
+
 
         if (!availableMoves)
         {
@@ -134,8 +137,21 @@ public class ChessDataService : IChessDataService
 
         var currentPlayer = (isWhite) ? game.WhitePlayer.Username : game.BlackPlayer.Username;
 
+        List<string> fenList = new List<string>();
+        fenList.Add("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        foreach (var move in game.Moves)
+        {
+            fenList.Add(move.FEN);
+        }
+
         return new ChessModel
-            { SessionId = sessionId, CurrentPlayer = currentPlayer, Players = [game.WhitePlayer.Username, game.BlackPlayer.Username] , LastMove = chessState.LastMove, Chessboard = chessState.GameBoard, FEN = ChessMethods.GenerateFEN(chessState), Id = game.Id, IsWhite = isWhite, Check = inCheck, CheckMate = gameDone, BlockCheckPositions = blockers, GameDone = gameDone };
+            { SessionId = sessionId, 
+            Players = [game.WhitePlayer.Username, game.BlackPlayer.Username], 
+            ChessBoard = chessState, 
+            Id = game.Id,
+            FenList = fenList.ToArray(),
+            GameType = game.GameType
+        };
     }
 
    

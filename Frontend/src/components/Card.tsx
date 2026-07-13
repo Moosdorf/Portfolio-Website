@@ -15,10 +15,9 @@ function Card(cardData: CardData) {
     }, []);
 
 
-
     return (
         <Link 
-            to={`/projects/${cardData.title.replace(/\s+/g, '').toLowerCase()}`} 
+            to={`/projects/${cardData.path}`} 
             className="group relative border border-gray-700 rounded-xl p-6
                     w-full sm:w-64
                     hover:border-blue-500

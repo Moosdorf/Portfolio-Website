@@ -1,11 +1,7 @@
 ﻿using Backend.Domain.Entities.Users;
 
 namespace Backend.Domain.Entities.Chess.Games;
-public enum GameType
-{
-    Bot,
-    Multiplayer
-}
+
 
 public enum GameResult
 {
@@ -18,7 +14,7 @@ public enum GameResult
 public class ChessGame
 {
     public int Id { get; set; }
-    public GameType GameType { get; set; }
+    public string GameType { get; set; }
 
     public int WhiteId { get; set; }
     public string WhiteUsername { get; set; } 
@@ -29,5 +25,6 @@ public class ChessGame
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public List<Move> Moves { get; set; } = []; 
+    public String CurrentFEN { get; set; } = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public GameResult Result { get; set; } = GameResult.Ongoing;
 }

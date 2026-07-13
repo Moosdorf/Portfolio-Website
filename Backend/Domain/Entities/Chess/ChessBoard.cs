@@ -8,6 +8,7 @@ public class ChessBoard
 {
 
     // if it is whites turn then we must find moves for the black pieces first, these lists can be used for that.
+    // building initial FEN 
     public string Turn { get; set; } = "w"; // fen 1
     public string Castling { get; set; } = "KQkq"; // fen 2
     public string EnPassantSquare { get; set; } = "-"; // fen 3
@@ -16,10 +17,12 @@ public class ChessBoard
     public string FEN { get; set; } // total FEN
 
 
-    // extra info
+    // game info
     public bool InCheck { get; set; } = false;
     public King? CheckedKing { get; set; } = null;
     public string LastMove { get; set; } = "";
+    public bool CheckMate { get; set; } = false;
+
 
     // board information
     public Piece[][] GameBoard { get; private set; }

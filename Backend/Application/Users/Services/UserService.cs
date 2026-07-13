@@ -12,7 +12,7 @@ public class UserService : IUserService
         _context = context;
     }
 
-    public User GetById(int id)
+    public async Task<User> GetById(int id)
     {
         return _context.Users.FirstOrDefault(u => u.Id == id);
     }

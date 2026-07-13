@@ -2,6 +2,7 @@
 
 public class CreateChessModel
 {
-    public string Player1 { get; set; } = null!;
-    public string Player2 { get; set; } = null!;
+    public int BlackId { get; set; } = -1;
+    public int WhiteId { get; set; } = -1;
+    public string GameMode { get; set; } = null!;
 }

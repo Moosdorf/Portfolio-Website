@@ -16,6 +16,7 @@ function CardContainer({ projects }: Props) {
                     key={project.id}
                     id={project.id}
                     title={project.title}
+                    path={project.path}
                     description={project.description}
                 />
             ))}

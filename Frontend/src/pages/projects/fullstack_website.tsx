@@ -4,15 +4,14 @@ import { useEffect, useState } from "react";
 function WebsiteProject() {
     const [websiteProject, setProject] = useState();
     useEffect(() => {
-        fetch(`https://localhost:5270/api/projects/1`, {
+        fetch(`https://localhost:5270/api/Projects/0`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         }).then(data => {
             console.log(data)
             return data.json();
         }).then(json => {
-            setProject(json.result);
-            console.log(json.result)
+            setProject(json);
         })
     }, [])
    
