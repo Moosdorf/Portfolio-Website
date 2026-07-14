@@ -264,6 +264,7 @@ public static class ChessMethods
         else chessState.HalfMoveNumber++;
 
         if (!attacker.IsWhite) chessState.FullMoveClock++;
+        chessState.FEN = GenerateFEN(chessState);
     }
 
     /// <summary>

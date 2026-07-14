@@ -27,6 +27,7 @@ public class StockFishService : IStockFishService
     }
     public MoveModel MoveFrom(string FEN)
     {
+        Console.WriteLine("position fen " + FEN);
         SendCommand("ucinewgame");
         SendCommand("position fen " + FEN);
         SendCommand("go movetime 1000"); 

@@ -36,6 +36,10 @@ builder.Services.AddScoped<IChessDataService, ChessDataService>();
 builder.Services.AddScoped<IStockFishService, StockFishService>();
 builder.Services.AddScoped<IPuzzleDataService, PuzzleDataService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddSignalR().AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.PropertyNamingPolicy = null; // match MVC's PascalCase
+}); ;
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -93,5 +97,6 @@ app.UseCors("AllowSpecificOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChessHub>("/hubs/chess");
 
 app.Run();

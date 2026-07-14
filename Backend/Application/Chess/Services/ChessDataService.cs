@@ -49,10 +49,13 @@ public class ChessDataService : IChessDataService
         return (dbEntryChessGame, chessBoard);
     }
 
-    public async Task<(ChessGame, ChessBoard)> CreateBotGameAsync(string user, bool white)
+    public async Task<(ChessGame, ChessBoard)> CreateBotGameAsync(CreateChessModel createChessModel)
     {
-        var player1 = await _dataService.GetByUsername(user);
-        var botPlayer = await _dataService.GetByUsername("stockfish");
+        bool white = createChessModel.BlackId == -1;
+        var playerId = white ? createChessModel.WhiteId : createChessModel.BlackId;
+
+        var player1 = await _dataService.GetById(playerId);
+        var botPlayer = await _dataService.GetByUsername("Stockfish - Bot");
 
         var chessBoard = new ChessBoard();
         var dbEntryChessGame = new ChessGame()
@@ -84,6 +87,7 @@ public class ChessDataService : IChessDataService
         var result = await _db.SaveChangesAsync() > 0;
         return result;
     }
+
     public async Task<ChessGame?> EndGame(int chessId, GameResult result)
     {
         ChessGame game = _db.ChessGames.FirstOrDefault(x => x.Id == chessId);
@@ -110,9 +114,6 @@ public class ChessDataService : IChessDataService
         var pieces = (isWhite) ? chessState.WhitePieces : chessState.BlackPieces;
 
         bool availableMoves = pieces.Any(x => x.AvailableMoves.Count > 0 || x.AvailableCaptures.Count > 0);
-
-        
-        
 
 
         if (!availableMoves)

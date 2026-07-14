@@ -119,7 +119,7 @@ export interface ChessGame {
 
   ChessBoard: ChessBoard;
 
-  GameType: number;
+  GameType: string;
 
   Players: string[];
 

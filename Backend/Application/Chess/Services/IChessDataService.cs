@@ -8,7 +8,7 @@ namespace Backend.Application.Chess.Services;
 public interface IChessDataService
 {
     Task<(ChessGame, ChessBoard)> CreateGameAsync(CreateChessModel createChessModel);
-    Task<(ChessGame, ChessBoard)> CreateBotGameAsync(string userName1, bool white);
+    Task<(ChessGame, ChessBoard)> CreateBotGameAsync(CreateChessModel createChessModel);
     Task<ChessGame?> EndGame(int chessId, GameResult result);
 
     Task<PaginatedList<ChessGameHistoryDTO>> GetMatchHistory(string username, int pageIndex);

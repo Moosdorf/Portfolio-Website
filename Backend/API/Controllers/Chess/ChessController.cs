@@ -6,6 +6,8 @@ using Backend.Domain.Entities.Chess;
 using Backend.Domain.Entities.Chess.Games;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Superpower.Model;
 using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text.Json;
@@ -17,16 +19,21 @@ namespace Backend.API.Controllers;
 [Route("api/chess")]
 public class ChessController : HomeController
 {
-    IChessDataService chessDataService;
+    IChessDataService chessDataService; 
+    private readonly IServiceScopeFactory _scopeFactory;
     IStockFishService stockFish;
-    readonly LinkGenerator _linkGenerator;
+    IHubContext<ChessHub> chessHub;
+    readonly LinkGenerator linkGenerator;
 
-    public ChessController(IChessDataService chessDataService, IStockFishService stockFishService, LinkGenerator linkGenerator)
+    public ChessController(IServiceScopeFactory scopeFactory, IChessDataService chessDataService, IStockFishService stockFish, IHubContext<ChessHub> chessHub, LinkGenerator linkGenerator)
     {
         this.chessDataService = chessDataService;
-        _linkGenerator = linkGenerator;
-        stockFish = stockFishService;
+        this.chessHub = chessHub;
+        this.linkGenerator = linkGenerator;
+        this.stockFish = stockFish;
+        _scopeFactory = scopeFactory;
     }
+
     // get game
     [HttpGet]
     [Route("{id}")]
@@ -34,25 +41,25 @@ public class ChessController : HomeController
     {
         ChessGame? game = await chessDataService.GetGameAsync(id);
         if (game == null) return BadRequest("Cannot find game");
-        Console.WriteLine("hello");
-        Console.WriteLine(game.CurrentFEN); 
         return Ok(JsonSerializer.Serialize(chessDataService.CreateChessModel(new ChessBoard(game.CurrentFEN), game, "non")));
     }
 
-    // create game
+    // create bot game
     [HttpPost]
     [Route("new")]
-    public async Task<IActionResult> CreateGame([FromBody] CreateChessModel model)
+    public async Task<IActionResult> CreateBotGame([FromBody] CreateChessModel model)
     {
-        Console.WriteLine(model);
+        
         if (model == null)
         {
             Console.WriteLine("no model");
             return NotFound();
         }
+        if (model.GameMode != "Bot") return BadRequest("Wrong gamemode"); 
+        ChessGame game;
+        ChessBoard chessState;
 
-        (ChessGame game, ChessBoard chessState) = await chessDataService.CreateGameAsync(model);
-
+        (game, chessState) = await chessDataService.CreateBotGameAsync(model);
 
         if (game == null)
         {
@@ -61,46 +68,73 @@ public class ChessController : HomeController
         }
 
 
-        Console.WriteLine("ok");
         return Ok(JsonSerializer.Serialize(chessDataService.CreateChessModel(chessState, game, "non")));
     }
 
-    // create bot game
+    // freeplay game
     [HttpPost]
-    [Route("newbotgame")]
-    public async Task<IActionResult> CreateBotGame(CreateBotChessModel model)
+    [Route("freeplay")]
+    public async Task<IActionResult> CreateFreeplayGame([FromBody] CreateChessModel model)
     {
+        Console.WriteLine(model);
         if (model == null)
         {
-            Console.WriteLine("model null");
+            Console.WriteLine("no model");
             return NotFound();
         }
+        if (model.GameMode != "Freeplay") return BadRequest("Wrong gamemode");
 
-        var username = User.FindFirstValue(ClaimTypes.Name);
-
-        (ChessGame game, ChessBoard chessState) = await chessDataService.CreateBotGameAsync(username, model.PickedWhite);
-
+        ChessGame game;
+        ChessBoard chessState;
+        (game, chessState) = await chessDataService.CreateGameAsync(model);
 
         if (game == null)
         {
-            Console.WriteLine("game null");
+            Console.WriteLine("no game");
             return NotFound();
         }
 
 
         return Ok(JsonSerializer.Serialize(chessDataService.CreateChessModel(chessState, game, "non")));
     }
+
+    // puzzle game
+    [HttpPost]
+    [Route("puzzle")]
+    public async Task<IActionResult> CreatePuzzleGame([FromBody] CreateChessModel model)
+    {
+        Console.WriteLine(model);
+        if (model == null)
+        {
+            Console.WriteLine("no model");
+            return NotFound();
+        }
+        if (model.GameMode != "Puzzle") return BadRequest("Wrong gamemode");
+
+        ChessGame game;
+        ChessBoard chessState;
+        (game, chessState) = await chessDataService.CreateGameAsync(model);
+
+        if (game == null)
+        {
+            Console.WriteLine("no game");
+            return NotFound();
+        }
+
+
+        return Ok(JsonSerializer.Serialize(chessDataService.CreateChessModel(chessState, game, "non")));
+    }
+
+
 
     [HttpPut]
     [Route("{id}/move")]
     public async Task<IActionResult> Move(int id, [FromBody] MoveModel moveModel)
     {
-        Console.WriteLine("go move");
         ChessGame? game = await chessDataService.GetGameAsync(id);
         // check if user is part of the game here if (game.player1 || game.player2 == moveModel.id???) return BadRequest("user not part of game");
         if (game == null) return BadRequest("CannotFindGame");
 
-        Console.WriteLine("found game");
         ChessBoard chessState;
         // create chess state from moves
         if (game.Moves.Count > 0)
@@ -110,27 +144,24 @@ public class ChessController : HomeController
         else
             chessState = new ChessBoard();
 
-        Console.WriteLine("generated chessboard");
 
         // validate if the move can be made
         var canMove = chessState.Move(moveModel);
         if (!canMove) return BadRequest("Cannot make move - dataservice");
 
-        Console.WriteLine("move is possible");
         var FEN = ChessMethods.GenerateFEN(chessState);
 
         // change in the database
         var moveMade = await chessDataService.MoveAsync(id, moveModel.Move, FEN);
         if (!moveMade) return BadRequest("Cannot make move - database");
 
-        Console.WriteLine("sending back new chessState");
         return Ok(JsonSerializer.Serialize(chessDataService.CreateChessModel(chessState, game, "non")));
     }
 
 
     [HttpPut]
-    [Route("{id}/moveBot")]
-    public async Task<IActionResult> MoveBot(int id)
+    [Route("bot/{id}/move")]
+    public async Task<IActionResult> MoveBot(int id, [FromBody] MoveModel moveModel)
     {
         ChessGame? game = await chessDataService.GetGameAsync(id);
         // check if user is part of the game here if (game.player1 || game.player2 == moveModel.id???) return BadRequest("user not part of game");
@@ -140,33 +171,66 @@ public class ChessController : HomeController
         // create chess state from moves
         if (game.Moves.Count > 0)
         {
-            Console.WriteLine("atleast 1 move");
             chessState = new ChessBoard(game.Moves.Last().FEN); // find last moves FEN to create state from
         }
         else
-        {
-            Console.WriteLine("no moves made");
             chessState = new ChessBoard();
+
+
+        // validate if the move can be made
+        var canMove = chessState.Move(moveModel);
+        if (!canMove) return BadRequest("Cannot make move - dataservice");
+
+        // change in the database
+        var moveMade = await chessDataService.MoveAsync(id, moveModel.Move, chessState.FEN);
+        if (!moveMade) return BadRequest("Cannot make move - database");
+
+        var result = JsonSerializer.Serialize(chessDataService.CreateChessModel(chessState, game, "non"));
+
+
+        if (game.GameType == "Bot")
+        {
+            _ = Task.Run(async () =>
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var scopedChessDataService = scope.ServiceProvider.GetRequiredService<IChessDataService>();
+                var scopedStockFish = scope.ServiceProvider.GetRequiredService<IStockFishService>();
+
+                try
+                {
+
+                    Console.WriteLine("1");
+                    var freshGame = await scopedChessDataService.GetGameAsync(id);
+                    if (freshGame == null) { Console.WriteLine("Game vanished"); return; }
+
+                    Console.WriteLine("2");
+                    var stockFishMove = scopedStockFish.MoveFrom(chessState.FEN);
+
+                    Console.WriteLine("3");
+                    var canMove = chessState.Move(stockFishMove);
+                    if (!canMove) Console.WriteLine("Cannot make move - dataservice");
+
+                    Console.WriteLine("4");
+                    var moveMade = await scopedChessDataService.MoveAsync(id, stockFishMove.Move, chessState.FEN);
+                    if (!moveMade) Console.WriteLine("Cannot make move - database");
+
+                    Console.WriteLine("6");
+                    var botResult = scopedChessDataService.CreateChessModel(chessState, freshGame, "non");
+
+                    Console.WriteLine("7");
+                    await chessHub.Clients.Group($"game-{game.Id}")
+                        .SendAsync("BoardUpdated", botResult);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Bot move failed: {ex}");
+                }
+            });
         }
 
 
-        var lastFEN = ChessMethods.GenerateFEN(chessState);
 
-
-        Console.WriteLine(lastFEN);
-        var stockFishMove = stockFish.MoveFrom(lastFEN);
-
-        // validate if the move can be made
-        var canMove = chessState.Move(stockFishMove);
-        if (!canMove) return BadRequest("Cannot make move - dataservice");
-
-        var FEN = ChessMethods.GenerateFEN(chessState);
-        Console.WriteLine("new fen: " + FEN);
-
-        // change in the database
-        var moveMade = await chessDataService.MoveAsync(id, stockFishMove.Move, FEN);
-        if (!moveMade) return BadRequest("Cannot make move - database");
-        return Ok(JsonSerializer.Serialize(chessDataService.CreateChessModel(chessState, game, "non")));
+        return Ok(result);
     }
 
 

@@ -10,6 +10,7 @@ import {
 import type { ChessBoard, ChessGame, ChessPiece, PromotionInformation, SelectedGameOptions } from './ChessTypes';
 import { ChessGameMode, PieceType } from './ChessTypes';
 import { useAuth } from '../../data/providers/AuthProvider';
+import * as signalR from '@microsoft/signalr';
 
 type ChessBoardContextValue = {
     chessGame: ChessGame | null;
@@ -52,7 +53,36 @@ function ChessBoardProvider({
     const [promotionInfo, setPromotionInfo] = useState<PromotionInformation | null>(null);
     const [activePlayer, setActivePlayer] = useState<string | null>(null);
     const { user } = useAuth();
-    
+    const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
+
+
+
+    useEffect(() => {
+        console.log("signalr")
+        const conn = new signalR.HubConnectionBuilder()
+            .withUrl('https://localhost:5270/hubs/chess', { withCredentials: true })
+            .withAutomaticReconnect()
+            .build();
+
+        conn.on('BoardUpdated', (game: ChessGame) => {
+            console.log("update???")
+            console.log(game)
+            handleSetChessGame(game);
+        });
+
+        conn.start()
+            .then(() => conn.invoke('JoinGame', chessGame?.Id.toString()))
+            .catch(err => console.error('SignalR connection error:', err));
+
+        setConnection(conn);
+        console.log(conn)
+
+        return () => {
+            conn.invoke('LeaveGame', chessGame?.Id.toString()).catch(() => {});
+            conn.stop();
+        };
+    }, [chessGame?.Id]);
+
     const handleSetChessGame = (game: ChessGame) => {
         if (game === null) return;
         if (user.username == game.Players[0]) game.ChessBoard.GameBoard = game?.ChessBoard.GameBoard.reverse();
@@ -64,6 +94,7 @@ function ChessBoardProvider({
         }
 
         setChessGame(game);
+        console.log("Setting chess game:", game);
     };
 
     useEffect(() => {
@@ -131,8 +162,11 @@ function ChessBoardProvider({
         chessGame.ChessBoard.Turn = chessGame.ChessBoard.Turn === "w" ? "b" : "w";
         handleSetChessGame(chessGame);
 
-
-        const res = await fetch(`https://localhost:5270/api/Chess/${chessGame?.Id}/move`, {
+        let path = chessGame.GameType == "Puzzle" ? `https://localhost:5270/api/Chess/${chessGame?.Id}/move` : 
+                    chessGame.GameType == "Freeplay" ? `https://localhost:5270/api/Chess/${chessGame?.Id}/move` : 
+                    chessGame.GameType == "Multiplayer" ? `https://localhost:5270/api/Chess/${chessGame?.Id}/move` : 
+                                                    `https://localhost:5270/api/Chess/bot/${chessGame?.Id}/move`; // bot
+        const res = await fetch(path, {
             method: 'PUT',
             credentials: 'include',
             headers: {
