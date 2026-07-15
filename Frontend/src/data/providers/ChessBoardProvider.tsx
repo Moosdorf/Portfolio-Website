@@ -16,8 +16,8 @@ type ChessBoardProviderProps = {
     selectedGameOptions: SelectedGameOptions;
 };
 
-// Builds a locally-simulated board so the UI can reflect a move
-// before the server confirms it. Purely visual — no rule validation.
+
+
 function buildOptimisticGame(game: ChessGame, from: ChessPiece, to: ChessPiece): ChessGame {
     const newBoard = game.ChessBoard.GameBoard.map(rank => rank.map(p => ({ ...p })));
 

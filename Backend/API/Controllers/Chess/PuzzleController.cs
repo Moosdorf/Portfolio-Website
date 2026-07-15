@@ -28,12 +28,6 @@ namespace ChessServer.Controllers
             return Ok(JsonSerializer.Serialize(_puzzleDataService.GetRandomPuzzle()));
         }
 
-        [HttpPut]
-        [Route("move")]
-        public async Task<IActionResult> GetNewPuzzleState([FromBody] PuzzleMove puzzleMove)
-        {
-            PuzzleDTO puzzle = _puzzleDataService.MovePuzzle(puzzleMove);
-            return Ok(puzzle);
-        }
+
     }
 }

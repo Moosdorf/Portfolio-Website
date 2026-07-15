@@ -9,5 +9,4 @@ public interface IPuzzleDataService
 {
     PuzzleDTO GetRandomPuzzle();
     PuzzleDTO GetPuzzle(int rating, string theme);
-    PuzzleDTO MovePuzzle(PuzzleMove puzzleMove);
 }

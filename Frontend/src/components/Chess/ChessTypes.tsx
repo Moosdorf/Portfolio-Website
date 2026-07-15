@@ -107,6 +107,7 @@ export interface ChessBoard {
 // --- Puzzles -----------
 export interface ChessPuzzle {
   ChessBoard: ChessBoard;
+  ChessBoards: ChessBoard[];
   FEN: string;
   GameUrl: string;
   Moves: string[];

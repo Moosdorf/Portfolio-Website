@@ -5,7 +5,8 @@ namespace Backend.Application.Chess.DTO;
 public class PuzzleDTO
 {
     public string PuzzleId { get; set; }
-    public ChessBoard ChessBoard { get; set; } = null!;
+    public ChessBoard ChessBoard { get; set; } = null!; // stores the first position that the user sees
+    public List<ChessBoard> ChessBoards { get; set; } = null!; // stores the remaining possible chess states from this puzzle
     public string FEN { get; set; }
     public int Rating { get; set; }
     public int RatingDeviation { get; set; }
