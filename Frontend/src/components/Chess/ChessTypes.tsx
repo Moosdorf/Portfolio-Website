@@ -104,6 +104,22 @@ export interface ChessBoard {
   WhiteKing: ChessPiece;
   Blockers: Square[];
 }
+// --- Puzzles -----------
+export interface ChessPuzzle {
+  ChessBoard: ChessBoard;
+  FEN: string;
+  GameUrl: string;
+  Moves: string[];
+  NbPlays: number
+  OpeningTags: string[]
+  Popularity: number
+  PuzzleId: string
+  Rating: number
+  RatingDeviation: number
+  Tags: string[]
+}
+
+
 
 // --- Users & game wrapper ---------------------------------------------
 export interface ChessMove {

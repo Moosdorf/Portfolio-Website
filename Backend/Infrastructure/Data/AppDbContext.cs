@@ -1,6 +1,7 @@
 ﻿using Backend.Domain.Entities.Chess.Games;
 using Backend.Domain.Entities.Project;
 using Backend.Domain.Entities.Users;
+using DataLayer.csv_scripts;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
@@ -15,10 +16,12 @@ public class AppDbContext : DbContext
     public DbSet<ChessGame> ChessGames { get; set; }
     public DbSet<Move> Moves { get; set; }
     public DbSet<Puzzle> Puzzles { get; set; }
+    public DbSet<Tag> Tags { get; set; }
 
 
     // projects
     public DbSet<Project> Projects { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +59,28 @@ public class AppDbContext : DbContext
             .WithMany(user => user.GamesAsBlack)
             .HasForeignKey(game => game.BlackId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // puzzles and puzzle tags
+        modelBuilder.Entity<PuzzleTag>(entity =>
+        {
+            entity.HasKey(pt => new { pt.PuzzleId, pt.TagId });
+
+            entity.HasOne(pt => pt.Puzzle)
+                .WithMany(p => p.PuzzleTags)
+                .HasForeignKey(pt => pt.PuzzleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(pt => pt.Tag)
+                .WithMany(t => t.PuzzleTags)
+                .HasForeignKey(pt => pt.TagId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(pt => pt.TagId);
+        });
+
+        modelBuilder.Entity<Tag>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
 
 
         /* --- PROJECT --- */

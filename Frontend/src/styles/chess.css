@@ -22,10 +22,11 @@
   background: #1e1e1e;
   color: white;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .wrapper {
-  flex: 0 0 70vh;
   display: flex;
   justify-content: center;
   position: relative;
@@ -144,16 +145,7 @@
 /* Board                           */
 /* ============================== */
 
-.chessboardDisplay {
-  width: 150px;
-  height: 150px;
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f0d9b5;
-}
+
 
 .chessboard {
   position: relative;
@@ -203,6 +195,7 @@
   position: absolute;
   inset: 0;
   border: 1px solid rgba(101, 81, 28, 0.1);
+  pointer-events: none;  
 }
 
 /* ============================== */
@@ -247,7 +240,7 @@
   height: 28%;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1;
+  z-index: 3;
 }
 
 .move {
@@ -262,12 +255,55 @@
   box-shadow: 0 0 8px rgba(255, 60, 60, 0.3);
 }
 
+/* puzzle */
+.puzzle-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+}
+
+.puzzle-info-heading {
+    text-decoration: underline;
+}
+
+.puzzle-id {
+    color: #888;
+    font-size: 0.85rem;
+    font-family: monospace;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.6rem 0;
+}
+
+.tag-pill {
+    background: #555555;
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.2rem 0.65rem;
+    border-radius: 9px;
+    text-transform: capitalize;
+}
+
+.puzzle-stats {
+    display: flex;
+    gap: 1rem;
+    margin-top: auto; 
+    font-size: 0.85rem;
+    color: #666;
+}
+
 /* ============================== */
 /* Square States                   */
 /* ============================== */
-
-.selected {
-  position: relative;
+.piece-cell {
+  position: absolute;
+  inset: 0;
 }
 
 .selected::after {
@@ -277,7 +313,7 @@
   background: rgba(226, 179, 58, 0.25);
   border: 2px solid rgba(226, 179, 58, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
-  z-index: 3;
+  z-index: 1;
 }
 
 .movedTo {
@@ -292,33 +328,82 @@
   border: 2px solid rgba(226, 179, 58, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
-}
+} 
 
 .check {
-  background: rgba(221, 136, 93, 0.7) !important;
-  border: 2px solid rgba(226, 136, 58, 0.7);
+  background: rgba(255, 230, 7, 0.7) !important;
+  border: 2px solid rgba(255, 0, 0, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
 }
 
 .checkmate {
-  background: rgba(187, 17, 17, 0.463) !important;
-  border: 2px solid rgba(150, 40, 40, 0.7);
+  background: rgba(212, 8, 8, 0.463) !important;
+  border: 2px solid rgba(255, 0, 0, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
 }
 
+.status-line {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  margin: 0 0 0.75rem;
+}
+
+.status-check {
+  background: rgba(226, 179, 58, 0.15);
+  color: #e2b33a;
+}
+
+.status-checkmate {
+  background: rgba(212, 8, 8, 0.2);
+  color: #ff6b6b;
+}
+
+.game-id {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 0.75rem;
+}
+
 /* ============================== */
-/* Move History                    */
+/* Player Bars                     */
 /* ============================== */
 
-.historyWhite {
-  display: block;
-  width: 100%;
-  padding: 0.25rem 0.5rem;
-  box-sizing: border-box;
-  text-align: right;
-  background-color: rgba(255, 255, 255, 0.594);
+.board-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 0 0 70vh;
+}
+
+.player-bar {
+  padding: 0.5rem 0.9rem;
+  background: #1e1e1e;
+  border-radius: 8px;
+  border: 1px solid rgb(255, 255, 255);
+}
+
+.player-bar.active {
+  background: #aca036;
+}
+
+.player-name {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-bar.active .player-name {
+  color: white;
 }
 
 /* ============================== */

@@ -174,7 +174,7 @@ public static class ChessMethods
                 case 'b':
                     promotionPiece = new Bishop(attacker.IsWhite) { Type = PieceType.Bishop };
                     break;
-                case 'k':
+                case 'n':
                     promotionPiece = new Knight(attacker.IsWhite) { Type = PieceType.Knight };
                     break;
 
@@ -187,6 +187,8 @@ public static class ChessMethods
         else
         {
             // put attacker on target and update the position
+            var pieceList = (!attacker.IsWhite) ? chessState.WhitePieces : chessState.BlackPieces;
+            if (pieceList.Contains(target)) pieceList.Remove(target); // if empty this does not happen
             chessState.GameBoard[tRow][tCol] = attacker;
         }
 

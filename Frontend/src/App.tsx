@@ -9,7 +9,7 @@ import ChessProject from './pages/projects/chess/chess.tsx';
 import WebsiteProject from './pages/projects/fullstack_website.tsx';
 import ChessFreeplay from './pages/projects/chess/chessFreeplay.tsx';
 import ChessBotGame from './pages/projects/chess/chessBotGame.tsx';
-import ChessPuzzle from './pages/projects/chess/chessPuzzle.tsx';
+import ChessPuzzleDisplay from './pages/projects/chess/chessPuzzle.tsx';
 
 function App() {
 
@@ -21,7 +21,7 @@ function App() {
           <Route path="/education" element={<Education />} />
           <Route path="/projects/chess" element={<ChessProject />} />
           <Route path="/projects/chess/bot" element={<ChessBotGame />} />
-          <Route path="/projects/chess/puzzle" element={<ChessPuzzle />} />
+          <Route path="/projects/chess/puzzle" element={<ChessPuzzleDisplay />} />
           <Route path="/projects/chess/freeplay" element={<ChessFreeplay />} />
           <Route path="/projects/fullstackwebsite" element={<WebsiteProject />} />
           <Route path="/account" element={<Account />} />

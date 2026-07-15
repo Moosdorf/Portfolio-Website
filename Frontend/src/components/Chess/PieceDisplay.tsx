@@ -1,9 +1,9 @@
 import { useAuth } from '../../data/providers/AuthProvider';
-import { useChessBoard } from './ChessBoard';
+import { useChessBoard } from './ChessBoardContext';
 import { PieceType, PromotionType, type ChessPiece, type PromotionSquare } from './ChessTypes';
 
 function PieceDisplay({ piece }: { piece: ChessPiece }) {
-    const { chessGame, selectedPiece, setSelectedPiece, promotionInfo, setPromotionInfo, activePlayer, attack } = useChessBoard()
+    const { chessGame, selectedPiece, setSelectedPiece, promotionInfo, setPromotionInfo, activePlayer, attack, isMoving } = useChessBoard()
     const { user } = useAuth();
 
     const color = piece.IsWhite ? "white" : "black";
@@ -12,10 +12,10 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
     const isMove = selectedPiece && selectedPiece.AvailableMoves.includes(piece.Position);
     const isTarget = selectedPiece && selectedPiece.AvailableCaptures.includes(piece.Position);
 
-    // light/dark derived from the square's own position, independent of board array order
-    const fileIndex = piece.Position.charCodeAt(0) - 'a'.charCodeAt(0);
-    const rankNum = parseInt(piece.Position[1], 10);
-    const isLight = (fileIndex + rankNum) % 2 === 0;
+    const whitesTurn = chessGame?.ChessBoard.Turn === "w";
+    // True only for the client whose turn it actually is right now —
+    // guards both click-to-move and drag-to-move.
+    const isMyTurn = !!user && activePlayer === user.username;
 
     const drag = (e: React.DragEvent<HTMLDivElement>, piece: ChessPiece) => {
         e.currentTarget.style.opacity = '0.6';
@@ -45,49 +45,52 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
         removeSelected();
     };
 
-    const onDrop = (piece: ChessPiece) => {
-        console.log(`Dropping ${selectedPiece?.Position} on ${piece.Position}`)
-        if (selectedPiece == null || CheckForPromotion(piece)) return;
+    const tryAttack = (target: ChessPiece) => {
+        if (selectedPiece &&
+            (selectedPiece.AvailableMoves.includes(target.Position) ||
+            selectedPiece.AvailableCaptures.includes(target.Position))) {
+            attack(target);
+            removeSelected();
+            return true;
+        }
+        return false;
+    };
 
+    const onDrop = (piece: ChessPiece) => {
+        if (isMoving || selectedPiece == null || CheckForPromotion(piece)) return;
         if (piece === selectedPiece) {
             addSelected(piece);
             return;
         }
-        if (selectedPiece.AvailableMoves.includes(piece.Position) || selectedPiece.AvailableCaptures.includes(piece.Position)) {
-            attack(piece);
-            removeSelected();
-        }
-        return;
+        tryAttack(piece);
     };
 
     const handleOnClick = (clickedPiece: ChessPiece) => {
-        console.log(clickedPiece)
-        if (promotionInfo || chessGame?.ChessBoard.CheckMate) return;
+        if (isMoving || promotionInfo || chessGame?.ChessBoard.CheckMate) return;
         if (CheckForPromotion(clickedPiece)) return;
 
         if (selectedPiece === null) {
             addSelected(clickedPiece);
             return;
         }
-
-        if (clickedPiece !== selectedPiece) {
-            // if selected piece belongs to the active player, select it instead, else "attack" the square. 
-            if (clickedPiece.IsWhite === clickedPiece.IsWhite) addSelected(clickedPiece);
-            if (selectedPiece.AvailableMoves.includes(clickedPiece.Position) ||
-                selectedPiece.AvailableCaptures.includes(clickedPiece.Position)) {
-                attack(clickedPiece);
-                removeSelected();
-            }
+        if (clickedPiece === selectedPiece) {
+            removeSelected();
             return;
         }
 
-        removeSelected();
-    }
-
-    const whitesTurn = chessGame?.ChessBoard.Turn === "w";
+        // if the clicked piece belongs to the same side, reselect it instead of attacking
+        if (clickedPiece.IsWhite === selectedPiece.IsWhite) addSelected(clickedPiece);
+        tryAttack(clickedPiece);
+    };
 
     const addSelected = (selectedPiece: ChessPiece) => {
-        if (selectedPiece.IsWhite === (whitesTurn) && selectedPiece.Type !== PieceType.Empty) {
+        // Only the player whose turn it currently is may select a piece,
+        // and only a piece of the color that's actually to move.
+        if (isMoving || !isMyTurn) {
+            setSelectedPiece(null);
+            return;
+        }
+        if (selectedPiece.IsWhite === whitesTurn && selectedPiece.Type !== PieceType.Empty) {
             setSelectedPiece(selectedPiece);
         }
         else setSelectedPiece(null);
@@ -128,14 +131,26 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
         return false;
     }
 
-    const pieceClass = `piece ${(user && chessGame && activePlayer == user.username && chessGame.Players[0] == activePlayer) ? "currentTurn" : ""}`;
+    let currentTurn = (user && chessGame && activePlayer == user.username && chessGame.Players[0] == activePlayer) ? "currentTurn" : ""
+    let squareClass = `piece-cell ${isSelected ? "selected" : ""}`;
+    let pieceClass = `${currentTurn} piece`;
 
-    const reversed = false;
+    const lastMoves = chessGame?.ChessBoard.LastMove.split(",");
+    if (lastMoves && piece.Position == lastMoves[1]) {
+        squareClass += " movedTo";
+    }
+    if (lastMoves && piece.Position == lastMoves[0]) {
+        squareClass += " movedFrom";
+    }
 
+    if (piece.Type === PieceType.King && piece.IsWhite === (chessGame?.ChessBoard.Turn === "w")) {
+        if (chessGame?.ChessBoard.InCheck) squareClass += " check";
+        if (chessGame?.ChessBoard.CheckMate) squareClass += " checkmate";
+    }
 
     return (
         <div
-            className={`square ${isLight ? "light" : "dark"} ${isSelected ? "selected" : ""}`}
+            className={squareClass}
             onClick={() => handleOnClick(piece)}
             onDragOver={dragOver}
             onDrop={() => onDrop(piece)}
@@ -144,7 +159,7 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
                 <img
                     className={pieceClass}
                     alt=""
-                    draggable={piece.IsWhite === whitesTurn && activePlayer === user?.username && !chessGame?.ChessBoard.CheckMate}
+                    draggable={!isMoving && piece.IsWhite === whitesTurn && isMyTurn && !chessGame?.ChessBoard.CheckMate}
                     onDragStart={(e) => {
                         drag(e, piece);
                         addSelected(piece);
@@ -155,9 +170,6 @@ function PieceDisplay({ piece }: { piece: ChessPiece }) {
 
             {isTarget && <div className='target'></div>}
             {isMove && <div className='move'></div>}
-
-            {user && piece.Position[0] === "h" && <div className='overlay-rank'>{piece.Position[1]}</div>}
-            {user && piece.Position[1] === ((!reversed) ? "8" : "1") && <div className='overlay-file'>{piece.Position[0]}</div>}
         </div>
     );
 }

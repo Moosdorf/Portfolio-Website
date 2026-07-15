@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260714202803_puzzles")]
+    partial class puzzles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,7 +73,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("WhitePlayerId");
 
-                    b.ToTable("ChessGames", (string)null);
+                    b.ToTable("ChessGames");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Chess.Games.Move", b =>
@@ -96,7 +99,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("ChessGameId");
 
-                    b.ToTable("Moves", (string)null);
+                    b.ToTable("Moves");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Chess.Games.Puzzle", b =>
@@ -145,7 +148,7 @@ namespace Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Puzzles", (string)null);
+                    b.ToTable("Puzzles");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Chess.Games.PuzzleTag", b =>
@@ -160,7 +163,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("PuzzleTag", (string)null);
+                    b.ToTable("PuzzleTag");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Chess.Games.Tag", b =>
@@ -180,7 +183,7 @@ namespace Backend.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Project.Project", b =>
@@ -208,7 +211,7 @@ namespace Backend.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Users.User", b =>
@@ -245,7 +248,7 @@ namespace Backend.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Chess.Games.ChessGame", b =>

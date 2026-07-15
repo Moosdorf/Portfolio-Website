@@ -1,12 +1,10 @@
-import ChessBoard from "../../../components/Chess/ChessBoard"
+import ChessBoard from "../../../data/providers/ChessBoardProvider"
 import ChessBoardDisplay from "../../../components/Chess/ChessBoardDisplay"
 
 function ChessFreeplay() {
     return (
         <div>
-            <ChessBoard selectedGameOptions={options}>
-                <ChessBoardDisplay selectedGameOptions={options} key={"freeplay"}/>
-            </ChessBoard>
+
         </div>
     )
         

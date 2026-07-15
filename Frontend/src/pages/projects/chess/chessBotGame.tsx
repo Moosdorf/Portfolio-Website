@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ChessBoard from "../../../components/Chess/ChessBoard"
+import ChessBoard from "../../../data/providers/ChessBoardProvider"
 import ChessBoardDisplay from "../../../components/Chess/ChessBoardDisplay"
 import { ChessGameMode, type SelectedGameOptions } from "../../../components/Chess/ChessTypes";
 import { useAuth } from "../../../data/providers/AuthProvider";
@@ -72,7 +72,7 @@ function ChessBotGame() {
     return (
         <div>
             <ChessBoard selectedGameOptions={options}>
-                <ChessBoardDisplay selectedGameOptions={options} key={"freeplay"}/>
+                <ChessBoardDisplay key={"freeplay"}/>
             </ChessBoard>
         </div>
     )

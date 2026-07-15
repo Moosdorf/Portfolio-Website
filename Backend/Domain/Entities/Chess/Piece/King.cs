@@ -90,8 +90,8 @@ public class King(bool white) : Piece(white)
                     var possibleMove = chessState.GameBoard[row][col - 2];
                     AvailableMoves.Add(possibleMove.Position);
                 }
-                if (col - i != 1)
-                break;
+                else if (col - i != 1)
+                    break;
             }
 
         }

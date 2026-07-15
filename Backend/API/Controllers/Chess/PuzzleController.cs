@@ -1,7 +1,11 @@
 ﻿using API.Controllers;
 using Backend.Application.Chess;
+using Backend.Application.Chess.DTO;
 using Backend.Application.Chess.Services;
+using Backend.Domain.Entities.Chess;
+using DataLayer.csv_scripts;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace ChessServer.Controllers
 {
@@ -21,7 +25,15 @@ namespace ChessServer.Controllers
         [Route("random")]
         public async Task<IActionResult> GetRandomPuzzle()
         {
-            return Ok(_puzzleDataService.GetRandomPuzzle());
+            return Ok(JsonSerializer.Serialize(_puzzleDataService.GetRandomPuzzle()));
+        }
+
+        [HttpPut]
+        [Route("move")]
+        public async Task<IActionResult> GetNewPuzzleState([FromBody] PuzzleMove puzzleMove)
+        {
+            PuzzleDTO puzzle = _puzzleDataService.MovePuzzle(puzzleMove);
+            return Ok(puzzle);
         }
     }
 }

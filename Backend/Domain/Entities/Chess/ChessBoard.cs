@@ -23,6 +23,8 @@ public class ChessBoard
     public string LastMove { get; set; } = "";
     public bool CheckMate { get; set; } = false;
 
+    public string? Winner { get; set; } = null;
+
 
     // board information
     public Piece[][] GameBoard { get; private set; }
@@ -89,6 +91,18 @@ public class ChessBoard
         LastMove = move;
 
         FindAvailableMoves();
+        
+        if (InCheck)
+        {
+            var activePieces = (CheckedKing.IsWhite) ? WhitePieces : BlackPieces;
+            CheckMate = true;
+            foreach (var piece in activePieces)
+            {
+                if (piece.AvailableCaptures.Count == 0 && piece.AvailableMoves.Count == 0) continue;
+                CheckMate = false;
+            }
+            Winner = (CheckedKing.IsWhite) ? "Black" : "White";
+        }
 
         return true;
     }
@@ -118,9 +132,12 @@ public class ChessBoard
         CheckedKing = null;
         InCheck = false;
         Blockers = [];
+        
         // reset all piece stats
         foreach (var piece in GameBoard.SelectMany(row => row))
         {
+            piece.Pinned = false;
+            piece.PinnedSquares = new();
             piece.AvailableMoves = new();
             piece.AvailableCaptures = new();
             piece.Attackers = new();

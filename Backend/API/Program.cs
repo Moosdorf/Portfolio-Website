@@ -3,6 +3,7 @@ using Backend.Application.Chess.Services;
 using Backend.Application.General.Services;
 using Backend.Application.Users.Services;
 using Backend.Domain.Entities.Users;
+using DataLayer.csv_scripts;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -39,7 +40,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSignalR().AddJsonProtocol(options =>
 {
     options.PayloadSerializerOptions.PropertyNamingPolicy = null; // match MVC's PascalCase
-}); ;
+}); 
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -98,5 +99,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChessHub>("/hubs/chess");
+
 
 app.Run();
