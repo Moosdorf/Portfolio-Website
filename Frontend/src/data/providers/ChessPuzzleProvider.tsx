@@ -1,11 +1,9 @@
 // data/providers/ChessPuzzleProvider.tsx
-import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { ChessBoardContext, type ChessBoardContextValue } from '../../components/Chess/ChessBoardContext';
 import { ChessGameMode, type ChessGame, type ChessPiece, type ChessPuzzle, type PromotionInformation } from '../../components/Chess/ChessTypes';
 import { useAuth } from '../../data/providers/AuthProvider';
 import { ChessPuzzleContext } from '../../components/Chess/ChessPuzzleContext';
-
-type Board = ChessPuzzle['ChessBoards'][number];
 
 type ChessPuzzleProviderProps = {
     children: ReactNode;
@@ -17,22 +15,13 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     const [currentChessGame, setCurrentChessGame] = useState<ChessGame | null>(null);
     const [selectedPiece, setSelectedPiece] = useState<ChessPiece | null>(null);
     const [promotionInfo, setPromotionInfo] = useState<PromotionInformation | null>(null);
-
     const [moveIndex, setMoveIndex] = useState(0);
     const [isMoving, setIsMoving] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
-
-    // Whether the user is playing black for the current puzzle.
-    const userIsBlackRef = useRef(false);
+    const [isBlack, setIsBlack] = useState(false);
+    const [isRevealed, setIsRevealed] = useState(false); // user hit "reveal solution"
 
     const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
-
-    // Black: reverse rows (ranks). White: reverse cols (files) within each row.
-    const orient = useCallback((board: Board): Board => {
-        return userIsBlackRef.current
-            ? { ...board, GameBoard: board.GameBoard.slice().reverse() }
-            : { ...board, GameBoard: board.GameBoard.map(row => row.slice().reverse()) };
-    }, []);
 
     const fetchNewPuzzle = useCallback(async () => {
         setIsFetching(true);
@@ -42,13 +31,13 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
             const puzzle: ChessPuzzle = await res.json();
             setChessPuzzle(puzzle);
+            setIsRevealed(false);
 
             const initialBoard = puzzle.ChessBoards[0];
-            const userIsBlack = !!user && initialBoard.Turn === 'b';
-            userIsBlackRef.current = userIsBlack;
+            setIsBlack(!!user && initialBoard.Turn === 'b');
 
             const startingGame = {
-                ChessBoard: orient(initialBoard),
+                ChessBoard: initialBoard,
                 Id: -1,
                 SessionId: "",
                 GameType: "Puzzle",
@@ -67,16 +56,14 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
             await sleep(1000);
 
-            // reveal step: boards[0] -> boards[1]
-            const revealedGame = { ...startingGame, ChessBoard: orient(puzzle.ChessBoards[1]) };
-            setCurrentChessGame(revealedGame);
+            setCurrentChessGame({ ...startingGame, ChessBoard: puzzle.ChessBoards[1] });
             setMoveIndex(1);
 
         } catch (err) {
             console.error('Failed to fetch chess board:', err);
             setIsFetching(false);
         }
-    }, [user, orient]);
+    }, [user]);
 
     const attack = useCallback(async (clickedPiece: ChessPiece) => {
         if (!currentChessGame || !chessPuzzle || !selectedPiece || isMoving) return;
@@ -93,26 +80,46 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         setIsMoving(true);
         setSelectedPiece(null);
 
-        // 1. Show the result of the user's move immediately
         const afterUserIndex = startIndex + 1;
         setCurrentChessGame(prev =>
-            prev ? { ...prev, ChessBoard: orient(chessPuzzle.ChessBoards[afterUserIndex]) } : prev
+            prev ? { ...prev, ChessBoard: chessPuzzle.ChessBoards[afterUserIndex] } : prev
         );
         setMoveIndex(afterUserIndex);
 
-        // 2. If there's a computer reply queued up in the puzzle, play it after a delay
         if (afterUserIndex < chessPuzzle.Moves.length) {
             await sleep(1000);
-
             const afterComputerIndex = afterUserIndex + 1;
             setCurrentChessGame(prev =>
-                prev ? { ...prev, ChessBoard: orient(chessPuzzle.ChessBoards[afterComputerIndex]) } : prev
+                prev ? { ...prev, ChessBoard: chessPuzzle.ChessBoards[afterComputerIndex] } : prev
             );
             setMoveIndex(afterComputerIndex);
         }
 
         setIsMoving(false);
-    }, [currentChessGame, chessPuzzle, selectedPiece, moveIndex, isMoving, orient]);
+    }, [currentChessGame, chessPuzzle, selectedPiece, moveIndex, isMoving]);
+
+
+    const revealSolution = useCallback(() => {
+        if (!chessPuzzle) return;
+        const finalIndex = chessPuzzle.ChessBoards.length - 1;
+        setCurrentChessGame(prev =>
+            prev ? { ...prev, ChessBoard: chessPuzzle.ChessBoards[finalIndex] } : prev
+        );
+        setMoveIndex(chessPuzzle.Moves.length);
+        setSelectedPiece(null);
+        setIsRevealed(true);
+    }, [chessPuzzle]);
+
+    const hintSquare = useMemo(() => {
+        if (!chessPuzzle || isMoving) return null;
+        const nextMove = chessPuzzle.Moves[moveIndex];
+        return nextMove ? nextMove.split(',')[0] : null;
+    }, [chessPuzzle, moveIndex, isMoving]);
+
+    const isSolved = useMemo(
+        () => !!chessPuzzle && moveIndex >= chessPuzzle.Moves.length && !isRevealed,
+        [chessPuzzle, moveIndex, isRevealed]
+    );
 
     const value = useMemo<ChessBoardContextValue>(() => ({
         chessGame: currentChessGame ?? null,
@@ -125,11 +132,20 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         gameMode: ChessGameMode.Puzzle,
         chessHistory: [],
         isMoving,
+        isBlack,
         attack,
-    }), [currentChessGame, selectedPiece, promotionInfo, isMoving, attack, user]);
+    }), [currentChessGame, selectedPiece, promotionInfo, isMoving, isBlack, attack, user]);
 
     return (
-        <ChessPuzzleContext.Provider value={{ currentPuzzle: chessPuzzle ?? null, fetchNewPuzzle, isFetching }}>
+        <ChessPuzzleContext.Provider value={{
+            currentPuzzle: chessPuzzle ?? null,
+            fetchNewPuzzle,
+            isFetching,
+            hintSquare,
+            revealSolution,
+            isRevealed,
+            isSolved,
+        }}>
             <ChessBoardContext.Provider value={value}>
                 {children}
             </ChessBoardContext.Provider>

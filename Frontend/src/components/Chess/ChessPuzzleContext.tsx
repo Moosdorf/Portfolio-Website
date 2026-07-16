@@ -6,6 +6,10 @@ export type ChessPuzzleContextValue = {
     currentPuzzle: ChessPuzzle | null;
     fetchNewPuzzle: () => Promise<void>;
     isFetching: boolean;
+    hintSquare: string | null;
+    revealSolution: () => void;
+    isRevealed: boolean;
+    isSolved: boolean;
 };
 
 export const ChessPuzzleContext = createContext<ChessPuzzleContextValue | undefined>(undefined);

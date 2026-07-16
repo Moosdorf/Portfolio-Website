@@ -16,9 +16,10 @@ function ChessPuzzleDisplay() {
 
 function ChessPuzzleInner() {
     const { user } = useAuth();
-    const { currentPuzzle, fetchNewPuzzle, isFetching } = useChessPuzzle();
+    const { currentPuzzle, fetchNewPuzzle, isFetching, hintSquare, revealSolution, isRevealed, isSolved } = useChessPuzzle();
     const { chessGame } = useChessBoard();
     const [selectingTag, setSelectingTag] = useState(false);
+
     if (currentPuzzle == null) {
         if (selectingTag) {
             return (
@@ -50,6 +51,10 @@ function ChessPuzzleInner() {
     const topTurn = isUserWhite ? "b" : "w";
     const bottomTurn = isUserWhite ? "w" : "b";
 
+    const handleNextPuzzle = () => {
+        fetchNewPuzzle();
+    };
+
     return (
         <div className="board-layout">
             <div className="fake-info-panel"></div>
@@ -59,7 +64,7 @@ function ChessPuzzleInner() {
                     <span className="player-name">{topPlayer || "Waiting for opponent…"}</span>
                 </div>
 
-                <ChessBoardGrid />
+                <ChessBoardGrid/>
 
                 <div className={`player-bar ${chessGame.ChessBoard.Turn === bottomTurn ? "active" : ""}`}>
                     <span className="player-name">{bottomPlayer}</span>
@@ -91,6 +96,36 @@ function ChessPuzzleInner() {
                     </div>
                 )}
                 <h5>Move: {chessGame.ChessBoard.FullMoveClock}</h5>
+
+                <div>
+                    {isSolved && (
+                        <div className="status-line status-solved">
+                            Puzzle Solved!
+                        </div>
+                    )}
+                    {isRevealed && !isSolved && (
+                        <div className="status-line status-revealed">
+                            Solution revealed
+                        </div>
+                    )}
+                </div>
+
+                <div className="puzzle-actions">
+                    <Button
+                        disabled={isSolved || isRevealed || !hintSquare}
+                    >
+                        Hint
+                    </Button>
+                    <Button
+                        onClick={revealSolution}
+                        disabled={isSolved || isRevealed}
+                    >
+                        Reveal Solution
+                    </Button>
+                    <Button onClick={handleNextPuzzle} disabled={isFetching}>
+                        {isFetching ? "Loading..." : "Next Puzzle"}
+                    </Button>
+                </div>
 
                 <div className="puzzle-stats">
                     <span>{currentPuzzle.NbPlays.toLocaleString()} plays</span>

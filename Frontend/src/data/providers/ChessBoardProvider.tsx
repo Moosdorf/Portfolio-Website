@@ -79,9 +79,6 @@ function ChessBoardProvider({
     // update chess game
     const handleSetChessGame = useCallback((game: ChessGame) => {
         if (game === null) return;
-        if (user && user.username === game.Players[0]) {
-            game.ChessBoard.GameBoard = game.ChessBoard.GameBoard.slice().reverse();
-        }
 
         if (game?.ChessBoard.Turn === "w") {
             setActivePlayer(game.Players[0]);

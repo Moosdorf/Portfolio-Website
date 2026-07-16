@@ -41,7 +41,7 @@ function ChessBoardDisplay() {
                     </div>
 
                     {/* Chessboard */}
-                    <ChessBoardGrid />
+                    <ChessBoardGrid/>
 
                     {/* You */}
                     <div className={`player-bar ${Turn === bottomTurn ? "active" : ""}`}>

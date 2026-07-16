@@ -57,7 +57,11 @@ public class PuzzleDataService : IPuzzleDataService
         for (int i = 0; i < moves.Count(); i++)
         {
             chessBoard.Move(new MoveModel { Move = moves[i] });
-            possibleStates.Add(new ChessBoard(chessBoard.FEN));
+            var tempBoard = new ChessBoard(chessBoard.FEN)
+            {
+                LastMove = moves[i]
+            };
+            possibleStates.Add(tempBoard);
         }
 
 
