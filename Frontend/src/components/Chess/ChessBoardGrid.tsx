@@ -10,13 +10,11 @@ function ChessBoardGrid() {
     const { user } = useAuth();
     if (!chessGame) return null;
 
-    console.log(user)
-    console.log(chessGame.Players)
-    let isBlack = user.username === chessGame.Players[1];
+    let isBlack = user.username === chessGame.players[1];
 
     const displayBoard = isBlack
-        ? chessGame.ChessBoard.GameBoard.map(row => [...row].reverse())
-        : [...chessGame.ChessBoard.GameBoard].reverse();
+        ? chessGame.chessBoard.gameBoard.map(row => [...row].reverse())
+        : [...chessGame.chessBoard.gameBoard].reverse();
 
     const displayRanks = isBlack ? RANKS : [...RANKS].reverse();
     const displayFiles = isBlack ? [...FILES].reverse() : FILES;
@@ -34,7 +32,7 @@ function ChessBoardGrid() {
                     {displayBoard.map((rank, rankIndex) =>
                         rank.map((piece, colIndex) => (
                             <div
-                                key={piece.Position}
+                                key={piece.position}
                                 className={`square ${(rankIndex + colIndex) % 2 === 0 ? "light" : "dark"}`}
                             >
                                 <PieceDisplay piece={piece} />

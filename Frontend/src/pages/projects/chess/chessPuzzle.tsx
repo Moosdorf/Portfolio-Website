@@ -45,9 +45,9 @@ function ChessPuzzleInner() {
         return <div>loading puzzle</div>;
     }
 
-    const isUserWhite = chessGame.Players[0] === user.username;
-    const topPlayer = isUserWhite ? chessGame.Players[1] : chessGame.Players[0];
-    const bottomPlayer = isUserWhite ? chessGame.Players[0] : chessGame.Players[1];
+    const isUserWhite = chessGame.players[0] === user.username;
+    const topPlayer = isUserWhite ? chessGame.players[1] : chessGame.players[0];
+    const bottomPlayer = isUserWhite ? chessGame.players[0] : chessGame.players[1];
     const topTurn = isUserWhite ? "b" : "w";
     const bottomTurn = isUserWhite ? "w" : "b";
 
@@ -60,42 +60,42 @@ function ChessPuzzleInner() {
             <div className="fake-info-panel"></div>
 
             <div className="board-column">
-                <div className={`player-bar ${chessGame.ChessBoard.Turn === topTurn ? "active" : ""}`}>
+                <div className={`player-bar ${chessGame.chessBoard.turn === topTurn ? "active" : ""}`}>
                     <span className="player-name">{topPlayer || "Waiting for opponent…"}</span>
                 </div>
 
                 <ChessBoardGrid/>
 
-                <div className={`player-bar ${chessGame.ChessBoard.Turn === bottomTurn ? "active" : ""}`}>
+                <div className={`player-bar ${chessGame.chessBoard.turn === bottomTurn ? "active" : ""}`}>
                     <span className="player-name">{bottomPlayer}</span>
                 </div>
             </div>
 
             <div className="info-panel border">
                 <h2 className="puzzle-info-heading">Puzzle Info</h2>
-                <h5 className="puzzle-id">#{currentPuzzle.PuzzleId}</h5>
-                <h5 className="rating-badge">Rating: {currentPuzzle.Rating}</h5>
+                <h5 className="puzzle-id">#{currentPuzzle.puzzleId}</h5>
+                <h5 className="rating-badge">Rating: {currentPuzzle.rating}</h5>
 
-                {chessGame.ChessBoard.CheckMate ? (
+                {chessGame.chessBoard.checkMate ? (
                     <p className="status-line status-checkmate">
-                        Checkmate: {chessGame.ChessBoard.Winner} wins
+                        Checkmate: {chessGame.chessBoard.winner} wins
                     </p>
-                ) : chessGame.ChessBoard.InCheck ? (
+                ) : chessGame.chessBoard.inCheck ? (
                     <p className="status-line status-check">Check</p>
                 ) : null}
 
-                {chessGame.ChessBoard.LastMove && <h5>Last move: {chessGame.ChessBoard.LastMove}</h5>}
+                {chessGame.chessBoard.lastMove && <h5>Last move: {chessGame.chessBoard.lastMove}</h5>}
 
-                {currentPuzzle.Tags?.length > 0 && (
+                {currentPuzzle.tags?.length > 0 && (
                     <div className="tag-list">
-                        {currentPuzzle.Tags.map(tag => (
+                        {currentPuzzle.tags.map(tag => (
                             <span key={tag} className="tag-pill">
                                 {tag.replace(/_/g, " ")}
                             </span>
                         ))}
                     </div>
                 )}
-                <h5>Move: {chessGame.ChessBoard.FullMoveClock}</h5>
+                <h5>Move: {chessGame.chessBoard.fullMoveClock}</h5>
 
                 <div>
                     {isSolved && (
@@ -128,8 +128,8 @@ function ChessPuzzleInner() {
                 </div>
 
                 <div className="puzzle-stats">
-                    <span>{currentPuzzle.NbPlays.toLocaleString()} plays</span>
-                    <span>{currentPuzzle.Popularity}% popularity</span>
+                    <span>{currentPuzzle.nbPlays.toLocaleString()} plays</span>
+                    <span>{currentPuzzle.popularity}% popularity</span>
                 </div>
             </div>
         </div>

@@ -11,9 +11,9 @@ function ChessBotGame() {
     const [started, setStarted] = useState(false);
     const [options, setOptions] = useState<SelectedGameOptions>(
         {
-            GameMode: ChessGameMode.Bot,
-            SelectedColor: "random",
-            Username: user?.username || null
+            gameMode: ChessGameMode.bot,
+            selectedColor: "random",
+            username: user?.username || null
         }
     )
 

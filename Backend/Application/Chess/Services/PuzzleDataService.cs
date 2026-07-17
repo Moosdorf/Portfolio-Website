@@ -1,5 +1,6 @@
 ﻿using Backend.Application.Chess.DTO;
 using Backend.Domain.Entities.Chess;
+using Backend.Domain.Entities.Chess.Games;
 using DataLayer.csv_scripts;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,36 @@ public class PuzzleDataService : IPuzzleDataService
 
         if (puzzle == null) return null;
 
+
+        return CreatePuzzleDTO(puzzle);
+    }
+
+    public PuzzleDTO GetRankedPuzzle(int rating)
+    {
+        int minRating = rating - 50;
+        int maxRating = rating + 50;
+
+        var query = _db.Puzzles
+            .Where(p => p.Rating >= minRating && p.Rating <= maxRating);
+
+        var count = query.Count();
+        if (count == 0) return null; // no puzzles in range
+
+        var randomOffset = _random.Next(0, count);
+
+        var puzzle = query
+            .OrderBy(p => p.Id) // stable, indexed order for Skip to work correctly
+            .Skip(randomOffset)
+            .Take(1)
+            .Include(p => p.PuzzleTags)
+                .ThenInclude(pt => pt.Tag)
+            .FirstOrDefault();
+
+        return puzzle == null ? null : CreatePuzzleDTO(puzzle);
+    }
+
+    public PuzzleDTO CreatePuzzleDTO(Puzzle puzzle)
+    {
         var tagNames = puzzle.PuzzleTags.Select(pt => pt.Tag.Name).ToList();
 
         // create the puzzle (before start position)
@@ -86,5 +117,4 @@ public class PuzzleDataService : IPuzzleDataService
 
         return dto;
     }
-
 }

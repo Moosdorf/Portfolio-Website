@@ -12,23 +12,23 @@ export type Color = "w" | "b";
  * queen=5, king=6, empty square=0.
  */
 export const PieceType = {
-  Empty: 0,
-  Pawn: 1,
-  Knight: 2,
-  Bishop: 3,
-  Rook: 4,
-  Queen: 5,
-  King: 6,
+  empty: 0,
+  pawn: 1,
+  knight: 2,
+  bishop: 3,
+  rook: 4,
+  queen: 5,
+  king: 6,
 } as const;
 
 export type PieceType = (typeof PieceType)[keyof typeof PieceType];
 
 // --- promotions ------------------------------------------------------------
 export const PromotionType = {
-  Knight: 2,
-  Bishop: 3,
-  Rook: 4,
-  Queen: 5,
+  knight: 2,
+  bishop: 3,
+  rook: 4,
+  queen: 5,
 }
 export type PromotionType = (typeof PromotionType)[keyof typeof PromotionType];
 
@@ -47,11 +47,11 @@ export type PromotionInformation = {
 
 // --- game modes ------------------------------------------------------------
 export const ChessGameMode = {
-  None: "None",
-  Multiplayer: "Multiplayer",
-  Bot: "Bot",
-  Puzzle: "Puzzle",
-  Freeplay: "Freeplay"
+  none: "None",
+  multiplayer: "Multiplayer",
+  bot: "Bot",
+  puzzle: "Puzzle",
+  freeplay: "Freeplay"
 } as const;
 
 export type ChessGameMode = (typeof ChessGameMode)[keyof typeof ChessGameMode];
@@ -63,87 +63,87 @@ export type Project = {
 }
 
 export type SelectedGameOptions = {
-    GameMode: ChessGameMode,
-    SelectedColor: string,
-    Username: string
+    gameMode: ChessGameMode,
+    selectedColor: string,
+    username: string
 }
 
 // --- Pieces ------------------------------------------------------------
 export interface ChessPiece {
-  Type: PieceType;
-  Position: Square;
-  IsWhite: boolean;
-  Pinned: boolean;
-  PinnedSquares: Square[];
-  AvailableMoves: Square[];
-  AvailableCaptures: Square[];
-  Attackers: Square[];
-  Defenders: Square[];
+  type: PieceType;
+  position: Square;
+  isWhite: boolean;
+  pinned: boolean;
+  pinnedSquares: Square[];
+  availableMoves: Square[];
+  availableCaptures: Square[];
+  attackers: Square[];
+  defenders: Square[];
 }
 
 // --- Board -----------------------------------------------------------
 export interface ChessBoard {
-  Turn: Color;
-  Castling: string; // e.g. "KQkq", or "-" once all rights are lost
-  EnPassantSquare: Square; // "-" when not applicable
-  HalfMoveNumber: number;
-  FullMoveClock: number;
-  FEN: string;
+  turn: Color;
+  castling: string; // e.g. "KQkq", or "-" once all rights are lost
+  enPassantSquare: Square; // "-" when not applicable
+  halfMoveNumber: number;
+  fullMoveClock: number;
+  fEN: string;
 
-  InCheck: boolean;
-  CheckedKing: ChessPiece | null;
-  LastMove: string;
-  CheckMate: boolean;
-  Winner: string | null;
+  inCheck: boolean;
+  checkedKing: ChessPiece | null;
+  lastMove: string;
+  checkMate: boolean;
+  winner: string | null;
 
   /** 8x8 grid, [rank][file] */
-  GameBoard: ChessPiece[][];
-  BlackPieces: ChessPiece[];
-  WhitePieces: ChessPiece[];
-  BlackKing: ChessPiece;
-  WhiteKing: ChessPiece;
-  Blockers: Square[];
+  gameBoard: ChessPiece[][];
+  blackPieces: ChessPiece[];
+  whitePieces: ChessPiece[];
+  blackKing: ChessPiece;
+  whiteKing: ChessPiece;
+  blockers: Square[];
 }
 // --- Puzzles -----------
 export interface ChessPuzzle {
-  ChessBoard: ChessBoard;
-  ChessBoards: ChessBoard[];
-  FEN: string;
-  GameUrl: string;
-  Moves: string[];
-  NbPlays: number
-  OpeningTags: string[]
-  Popularity: number
-  PuzzleId: string
-  Rating: number
-  RatingDeviation: number
-  Tags: string[]
+  chessBoard: ChessBoard;
+  chessBoards: ChessBoard[];
+  fEN: string;
+  gameUrl: string;
+  moves: string[];
+  nbPlays: number
+  openingTags: string[]
+  popularity: number
+  puzzleId: string
+  rating: number
+  ratingDeviation: number
+  tags: string[]
 }
 
 
 
 // --- Users & game wrapper ---------------------------------------------
 export interface ChessMove {
-  ChessGameId: number;
-  MoveString: string;
-  FEN: string;
+  chessGameId: number;
+  moveString: string;
+  fEN: string;
 }
 
 
 export interface ChessGame {
-  Id: number;
-  SessionId: string;
+  id: number;
+  sessionId: string;
 
-  ChessBoard: ChessBoard;
+  chessBoard: ChessBoard;
 
-  GameType: string;
+  gameType: string;
 
-  Players: string[];
+  players: string[];
 
-  Moves: ChessMove[];
-  FenList: string[];
+  moves: ChessMove[];
+  fenList: string[];
 
-  GameStarted: string; // ISO 8601 timestamp
+  gameStarted: string; // ISO 8601 timestamp
 }
 
 

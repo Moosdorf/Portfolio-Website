@@ -9,4 +9,5 @@ public interface IPuzzleDataService
 {
     PuzzleDTO GetRandomPuzzle();
     PuzzleDTO GetPuzzle(int rating, string theme);
+    PuzzleDTO GetRankedPuzzle(int rating);
 }

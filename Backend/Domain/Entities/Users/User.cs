@@ -16,6 +16,8 @@ public class User
     public string Email { get; set; } = string.Empty; // unique
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public int PuzzleRating { get; set; } = 1500;
+
     [JsonIgnore] // to avoid include loops
     public List<ChessGame> GamesAsWhite { get; set; }
     [JsonIgnore]

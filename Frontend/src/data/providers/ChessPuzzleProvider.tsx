@@ -26,7 +26,10 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     const fetchNewPuzzle = useCallback(async () => {
         setIsFetching(true);
         try {
-            const res = await fetch(`https://localhost:5270/api/puzzle/random`, { method: 'GET' });
+            const res = await fetch(`https://localhost:5270/api/puzzle/random`, { 
+                method: 'GET',
+                credentials: 'include'
+             });
             if (!res.ok) throw new Error(`Failed to load board: ${res.status}`);
 
             const puzzle: ChessPuzzle = await res.json();
@@ -34,21 +37,21 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             setIsRevealed(false);
 
             console.log(puzzle)
-            const initialBoard = puzzle.ChessBoards[0];
-            setIsBlack(!!user && initialBoard.Turn === 'b');
+            const initialBoard = puzzle.chessBoards[0];
+            setIsBlack(!!user && initialBoard.turn === 'b');
 
             const startingGame = {
-                ChessBoard: initialBoard,
-                Id: -1,
-                SessionId: "",
-                GameType: "Puzzle",
-                Players: [
-                    initialBoard.Turn === "b" ? user.username : "puzzle",
-                    initialBoard.Turn === "w" ? user.username : "puzzle",
+                chessBoard: initialBoard,
+                id: -1,
+                sessionId: "",
+                gameType: "Puzzle",
+                players: [
+                    initialBoard.turn === "b" ? user.username : "puzzle",
+                    initialBoard.turn === "w" ? user.username : "puzzle",
                 ],
-                Moves: [],
-                FenList: [puzzle.FEN],
-                GameStarted: "",
+                moves: [],
+                fenList: [puzzle.fEN],
+                gameStarted: "",
             } satisfies ChessGame;
 
             setCurrentChessGame(startingGame);
@@ -57,7 +60,7 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
             await sleep(1000);
 
-            setCurrentChessGame({ ...startingGame, ChessBoard: puzzle.ChessBoards[1] });
+            setCurrentChessGame({ ...startingGame, chessBoard: puzzle.chessBoards[1] });
             setMoveIndex(1);
 
         } catch (err) {
@@ -67,11 +70,19 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     }, [user]);
 
     const attack = useCallback(async (clickedPiece: ChessPiece) => {
-        if (!currentChessGame || !chessPuzzle || !selectedPiece || isMoving) return;
+        console.log("chess?=")
+        console.log(currentChessGame)
+        if (!currentChessGame || !chessPuzzle || !selectedPiece || isMoving) {
+            setSelectedPiece(null);
+            return;
+        }
 
-        const attempted = `${selectedPiece.Position},${clickedPiece.Position}`;
+        const attempted = `${selectedPiece.position},${clickedPiece.position}`;
+        console.log("attack")
+        console.log(attempted)
         const startIndex = moveIndex;
-        const expected = chessPuzzle.Moves[startIndex];
+        const expected = chessPuzzle.moves[startIndex];
+        console.log(expected)
 
         if (attempted !== expected) {
             setSelectedPiece(null);
@@ -83,15 +94,15 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
         const afterUserIndex = startIndex + 1;
         setCurrentChessGame(prev =>
-            prev ? { ...prev, ChessBoard: chessPuzzle.ChessBoards[afterUserIndex] } : prev
+            prev ? { ...prev, ChessBoard: chessPuzzle.chessBoards[afterUserIndex] } : prev
         );
         setMoveIndex(afterUserIndex);
 
-        if (afterUserIndex < chessPuzzle.Moves.length) {
+        if (afterUserIndex < chessPuzzle.moves.length) {
             await sleep(1000);
             const afterComputerIndex = afterUserIndex + 1;
             setCurrentChessGame(prev =>
-                prev ? { ...prev, ChessBoard: chessPuzzle.ChessBoards[afterComputerIndex] } : prev
+                prev ? { ...prev, ChessBoard: chessPuzzle.chessBoards[afterComputerIndex] } : prev
             );
             setMoveIndex(afterComputerIndex);
         }
@@ -102,23 +113,23 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
     const revealSolution = useCallback(() => {
         if (!chessPuzzle) return;
-        const finalIndex = chessPuzzle.ChessBoards.length - 1;
+        const finalIndex = chessPuzzle.chessBoards.length - 1;
         setCurrentChessGame(prev =>
-            prev ? { ...prev, ChessBoard: chessPuzzle.ChessBoards[finalIndex] } : prev
+            prev ? { ...prev, ChessBoard: chessPuzzle.chessBoards[finalIndex] } : prev
         );
-        setMoveIndex(chessPuzzle.Moves.length);
+        setMoveIndex(chessPuzzle.moves.length);
         setSelectedPiece(null);
         setIsRevealed(true);
     }, [chessPuzzle]);
 
     const hintSquare = useMemo(() => {
         if (!chessPuzzle || isMoving) return null;
-        const nextMove = chessPuzzle.Moves[moveIndex];
+        const nextMove = chessPuzzle.moves[moveIndex];
         return nextMove ? nextMove.split(',')[0] : null;
     }, [chessPuzzle, moveIndex, isMoving]);
 
     const isSolved = useMemo(
-        () => !!chessPuzzle && moveIndex >= chessPuzzle.Moves.length && !isRevealed,
+        () => !!chessPuzzle && moveIndex >= chessPuzzle.moves.length && !isRevealed,
         [chessPuzzle, moveIndex, isRevealed]
     );
 
@@ -130,7 +141,7 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         setPromotionInfo,
         activePlayer: user?.username ?? null,
         setActivePlayer: () => {},
-        gameMode: ChessGameMode.Puzzle,
+        gameMode: ChessGameMode.puzzle,
         chessHistory: [],
         isMoving,
         isBlack,

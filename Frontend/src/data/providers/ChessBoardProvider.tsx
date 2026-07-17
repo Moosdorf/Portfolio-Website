@@ -80,10 +80,10 @@ function ChessBoardProvider({
     const handleSetChessGame = useCallback((game: ChessGame) => {
         if (game === null) return;
 
-        if (game?.ChessBoard.Turn === "w") {
-            setActivePlayer(game.Players[0]);
+        if (game?.chessBoard.turn === "w") {
+            setActivePlayer(game.players[0]);
         } else {
-            setActivePlayer(game.Players[1]);
+            setActivePlayer(game.players[1]);
         }
 
         setChessGame(game);
@@ -106,17 +106,17 @@ function ChessBoardProvider({
         });
 
         conn.start()
-            .then(() => conn.invoke('JoinGame', chessGame?.Id.toString()))
+            .then(() => conn.invoke('JoinGame', chessGame?.id.toString()))
             .catch(err => console.error('SignalR connection error:', err));
 
         setConnection(conn);
         console.log(conn)
 
         return () => {
-            conn.invoke('LeaveGame', chessGame?.Id.toString()).catch(() => {});
+            conn.invoke('LeaveGame', chessGame?.id.toString()).catch(() => {});
             conn.stop();
         };
-    }, [chessGame?.Id, handleSetChessGame]);
+    }, [chessGame?.id, handleSetChessGame]);
 
     // create new game
     useEffect(() => {
@@ -126,16 +126,16 @@ function ChessBoardProvider({
                 if (!user) return;
 
                 let body = JSON.stringify({})
-                console.log(selectedGameOptions?.SelectedColor)
-                if (selectedGameOptions?.SelectedColor === "white") {
+                console.log(selectedGameOptions?.selectedColor)
+                if (selectedGameOptions?.selectedColor === "white") {
                     body = JSON.stringify({
-                        GameMode: selectedGameOptions?.GameMode,
+                        GameMode: selectedGameOptions?.gameMode,
                         BlackId: -1,
                         WhiteId: user.id
                     });
                 } else {
                     body = JSON.stringify({
-                        GameMode: selectedGameOptions?.GameMode,
+                        GameMode: selectedGameOptions?.gameMode,
                         WhiteId: -1,
                         BlackId: user.id
                     });
@@ -161,7 +161,7 @@ function ChessBoardProvider({
             }
         }
         createNewGame();
-    }, [selectedGameOptions?.GameMode, user, handleSetChessGame, selectedGameOptions]);
+    }, [selectedGameOptions?.gameMode, user, handleSetChessGame, selectedGameOptions]);
 
     // attack
     const attack = useCallback(async (clickedPiece: ChessPiece) => {
@@ -174,10 +174,10 @@ function ChessBoardProvider({
         setChessGame(optimisticGame);
         setSelectedPiece(null);
 
-        let path = chessGame.GameType == "Puzzle" ? `https://localhost:5270/api/Chess/${chessGame?.Id}/move` :
-                    chessGame.GameType == "Freeplay" ? `https://localhost:5270/api/Chess/${chessGame?.Id}/move` :
-                    chessGame.GameType == "Multiplayer" ? `https://localhost:5270/api/Chess/${chessGame?.Id}/move` :
-                                                    `https://localhost:5270/api/Chess/bot/${chessGame?.Id}/move`; // bot
+        let path = chessGame.gameType == "Puzzle" ? `https://localhost:5270/api/Chess/${chessGame?.id}/move` :
+                    chessGame.gameType == "Freeplay" ? `https://localhost:5270/api/Chess/${chessGame?.id}/move` :
+                    chessGame.gameType == "Multiplayer" ? `https://localhost:5270/api/Chess/${chessGame?.id}/move` :
+                                                    `https://localhost:5270/api/Chess/bot/${chessGame?.id}/move`; // bot
         try {
             const res = await fetch(path, {
                 method: 'PUT',
@@ -186,9 +186,9 @@ function ChessBoardProvider({
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    Move: `${selectedPiece?.Position},${clickedPiece.Position}`,
+                    Move: `${selectedPiece?.position},${clickedPiece.position}`,
                     User: user?.username,
-                    GameId: chessGame?.Id,
+                    GameId: chessGame?.id,
                     Promotion: null
                 }),
             });
@@ -217,7 +217,7 @@ function ChessBoardProvider({
             setPromotionInfo,
             activePlayer,
             setActivePlayer,
-            gameMode: selectedGameOptions?.GameMode || null,
+            gameMode: selectedGameOptions?.gameMode || null,
             chessHistory,
             isMoving,
             attack,

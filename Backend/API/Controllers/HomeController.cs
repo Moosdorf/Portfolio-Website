@@ -20,7 +20,7 @@ public class ProjectsController(IGeneralService genService) : HomeController
     public async Task<IActionResult> GetProject(int id)
     {
         var project = await genService.GetProjectById(id);
-        if (project == null) return BadRequest("Cannot find project");
+        if (project == null) return NotFound("Cannot find project");
         return Ok(project);
     }
 
@@ -29,7 +29,7 @@ public class ProjectsController(IGeneralService genService) : HomeController
     {
         var projects = await genService.GetProjects();
 
-        if (projects == null || projects.Count == 0) return BadRequest("Cannot find project");
+        if (projects == null || projects.Count == 0) return NotFound("Cannot find project");
         return Ok(projects);
     }
 }
