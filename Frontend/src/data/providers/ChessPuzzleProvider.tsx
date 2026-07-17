@@ -33,6 +33,7 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             setChessPuzzle(puzzle);
             setIsRevealed(false);
 
+            console.log(puzzle)
             const initialBoard = puzzle.ChessBoards[0];
             setIsBlack(!!user && initialBoard.Turn === 'b');
 

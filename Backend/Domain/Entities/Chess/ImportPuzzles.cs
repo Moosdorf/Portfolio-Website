@@ -21,6 +21,7 @@ public static class CsvImportScript
             .AsNoTracking()
             .ToDictionary(t => t.Name, t => t.Id);
 
+        var count = 0;
         foreach (var record in csv.GetRecords<PuzzleScript>())
         {
             var puzzle = new Puzzle
@@ -63,6 +64,11 @@ public static class CsvImportScript
                 context.SaveChanges();
                 context.ChangeTracker.Clear();
                 batch.Clear();
+                if (count > 10)
+                {
+                    break;
+                }
+                count++;
             }
         }
 

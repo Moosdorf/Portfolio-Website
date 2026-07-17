@@ -9,6 +9,8 @@ namespace Backend.Application.Chess.Services;
 
 public class ChessDataService : IChessDataService
 {
+    private const string BotUsername = "Stockfish - Bot";
+
     private AppDbContext _db;
     private IUserService _dataService;
 
@@ -18,60 +20,51 @@ public class ChessDataService : IChessDataService
         _dataService = dataService;
     }
 
-
-
+    // Single entry point for Bot / Freeplay / Puzzle game creation.
+    // GameMode on the model decides how white/black ids are resolved;
+    // everything after that (building + saving the ChessGame) is shared.
     public async Task<(ChessGame, ChessBoard)> CreateGameAsync(CreateChessModel createChessModel)
     {
-        var white = await _dataService.GetById(createChessModel.WhiteId);
-        var black = await _dataService.GetById(createChessModel.BlackId);
+        var (whiteId, blackId) = createChessModel.GameMode == "Bot"
+            ? await ResolveBotPlayerIdsAsync(createChessModel)
+            : (createChessModel.WhiteId, createChessModel.BlackId);
 
-       if (white == null && black == null)
-       {
+        var white = await _dataService.GetById(whiteId);
+        var black = await _dataService.GetById(blackId);
+
+        if (white == null || black == null)
+        {
             Console.WriteLine("players null");
             return (null, null);
-       }
-
+        }
 
         var dbEntryChessGame = new ChessGame()
         {
+            WhiteId = white.Id,
+            BlackId = black.Id,
             WhiteUsername = white.Username,
             BlackUsername = black.Username,
             WhitePlayer = white,
             BlackPlayer = black,
             GameType = createChessModel.GameMode,
         };
+
         var chessBoard = new ChessBoard();
-
-
 
         _db.ChessGames.Add(dbEntryChessGame);
         await _db.SaveChangesAsync();
         return (dbEntryChessGame, chessBoard);
     }
 
-    public async Task<(ChessGame, ChessBoard)> CreateBotGameAsync(CreateChessModel createChessModel)
+    // Bot games encode "who's the human" via BlackId == -1.
+    // Resolves that into a concrete (whiteId, blackId) pair against the bot user.
+    private async Task<(int whiteId, int blackId)> ResolveBotPlayerIdsAsync(CreateChessModel model)
     {
-        bool white = createChessModel.BlackId == -1;
-        var playerId = white ? createChessModel.WhiteId : createChessModel.BlackId;
+        bool humanIsWhite = model.BlackId == -1;
+        var humanId = humanIsWhite ? model.WhiteId : model.BlackId;
+        var bot = await _dataService.GetByUsername(BotUsername);
 
-        var player1 = await _dataService.GetById(playerId);
-        var botPlayer = await _dataService.GetByUsername("Stockfish - Bot");
-
-        var chessBoard = new ChessBoard();
-        var dbEntryChessGame = new ChessGame()
-        {
-            WhiteId = (white) ? player1.Id : botPlayer.Id,
-            WhitePlayer = (white) ? player1 : botPlayer,
-            BlackId = (!white) ? player1.Id : botPlayer.Id,
-            BlackPlayer = (!white) ? player1 : botPlayer,
-            WhiteUsername = (white) ? player1.Username : botPlayer.Username,
-            BlackUsername = (!white) ? player1.Username : botPlayer.Username,
-            GameType = "Bot"
-        };
-
-        _db.ChessGames.Add(dbEntryChessGame);
-        await _db.SaveChangesAsync();
-        return (dbEntryChessGame, chessBoard);
+        return humanIsWhite ? (humanId, bot.Id) : (bot.Id, humanId);
     }
 
     public async Task<bool> MoveAsync(int chessId, string move, string FEN)
@@ -92,17 +85,14 @@ public class ChessDataService : IChessDataService
     {
         ChessGame game = _db.ChessGames.FirstOrDefault(x => x.Id == chessId);
         if (game == null) return null;
-        Console.WriteLine("chess id: " + chessId);
         game.Result = result;
-        Console.WriteLine("game results: " + result);
         var saved = await _db.SaveChangesAsync() > 0;
-        Console.WriteLine("saved");
 
         if (saved) return game;
         return null;
-    } 
+    }
 
-    public ChessModel CreateChessModel(ChessBoard chessState, ChessGame game, string sessionId) 
+    public ChessModel CreateChessModel(ChessBoard chessState, ChessGame game, string sessionId)
     {
         var isWhite = chessState.Turn == "w";
         var king = (isWhite) ? chessState.WhiteKing : chessState.BlackKing;
@@ -115,24 +105,20 @@ public class ChessDataService : IChessDataService
 
         bool availableMoves = pieces.Any(x => x.AvailableMoves.Count > 0 || x.AvailableCaptures.Count > 0);
 
-
         if (!availableMoves)
         {
             gameDone = true;
-            Console.WriteLine("draw");
             // draw
         }
 
         if (!availableMoves && inCheck)
         {
-            Console.WriteLine("a player has won");
             gameDone = true;
             // a player has won
         }
 
         if (game.Result != GameResult.Ongoing)
         {
-            Console.WriteLine("game is already done");
             gameDone = true;
         }
 
@@ -146,28 +132,24 @@ public class ChessDataService : IChessDataService
         }
 
         return new ChessModel
-            { SessionId = sessionId, 
-            Players = [game.WhitePlayer.Username, game.BlackPlayer.Username], 
-            ChessBoard = chessState, 
+        {
+            SessionId = sessionId,
+            Players = [game.WhitePlayer.Username, game.BlackPlayer.Username],
+            ChessBoard = chessState,
             Id = game.Id,
             FenList = fenList.ToArray(),
             GameType = game.GameType
         };
     }
 
-   
-
     const int pageSize = 5;
     public async Task<PaginatedList<ChessGameHistoryDTO>> GetMatchHistory(string username, int pageIndex)
     {
         var query = _db.ChessGames
-            .AsNoTracking() // just reading
+            .AsNoTracking()
             .Where(g => g.WhitePlayer.Username == username || g.BlackPlayer.Username == username);
 
         var totalCount = await query.CountAsync();
-        Console.WriteLine("here");
-        Console.WriteLine(pageIndex);
-        Console.WriteLine(pageSize);
         var games = query
             .OrderByDescending(g => g.Id)
             .Skip(pageIndex * pageSize)
@@ -187,6 +169,7 @@ public class ChessDataService : IChessDataService
 
         return await PaginatedList<ChessGameHistoryDTO>.CreateAsync(games, totalCount, pageIndex, pageSize);
     }
+
     public async Task<ChessGame?> GetGameAsync(int chessId)
     {
         var game = await _db.ChessGames
@@ -202,10 +185,8 @@ public class ChessDataService : IChessDataService
         throw new NotImplementedException();
     }
 
-
     public bool RemoveLastMove(int chessId)
     {
         throw new NotImplementedException();
     }
 }
-

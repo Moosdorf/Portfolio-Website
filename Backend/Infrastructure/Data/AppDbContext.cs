@@ -51,7 +51,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ChessGame>()
             .HasOne(game => game.WhitePlayer)
             .WithMany(user => user.GamesAsWhite)
-            .HasForeignKey(game => game.BlackId)
+            .HasForeignKey(game => game.WhiteId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<ChessGame>()

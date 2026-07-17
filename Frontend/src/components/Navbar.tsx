@@ -44,7 +44,6 @@ function Navbar() {
             {/* Nav links  ml-auto pushes them to the right */}
             <ul className="hidden sm:flex gap-6 items-center ml-auto mr-4">
               <li><Link to="/education" className="hover:text-gray-100">Education</Link></li>
-              <li><Link to="/projects" className="hover:text-gray-100">Projects</Link></li>
               <li><Link to="/account" className="hover:text-gray-100">Account</Link></li>
             </ul>
 
@@ -70,7 +69,6 @@ function Navbar() {
           <div id="dropdown"className={`border border-gray-600 rounded-md w-35 bg-gray-500 ${toggleMenu ? 'block' : 'hidden'} absolute right-5 top-full z-50 -mt-4`}>
             <ul className="py-2 p-1">
               <li onClick={() => setToggleMenu(false)}><Link to="/education" className="block py-1 hover:bg-gray-400 rounded">Education</Link></li>
-              <li onClick={() => setToggleMenu(false)}><Link to="/projects" className="block py-1 hover:bg-gray-400 rounded">Projects</Link></li>
               <li onClick={() => setToggleMenu(false)}><Link to="/account" className="block py-1 hover:bg-gray-400 rounded">Account</Link></li>
               {user && <li onClick={() => setToggleMenu(false)}><Link onClick={() => logout()} to="/account" className="block border border-red-300 py-1 hover:bg-red-400 rounded">Log Out</Link></li>}
               </ul>

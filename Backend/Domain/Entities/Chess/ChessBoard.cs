@@ -91,18 +91,7 @@ public class ChessBoard
         LastMove = move;
 
         FindAvailableMoves();
-        
-        if (InCheck)
-        {
-            var activePieces = (CheckedKing.IsWhite) ? WhitePieces : BlackPieces;
-            CheckMate = true;
-            foreach (var piece in activePieces)
-            {
-                if (piece.AvailableCaptures.Count == 0 && piece.AvailableMoves.Count == 0) continue;
-                CheckMate = false;
-            }
-            Winner = (CheckedKing.IsWhite) ? "Black" : "White";
-        }
+       
 
         return true;
     }
@@ -166,6 +155,19 @@ public class ChessBoard
             {
                 piece.FindMoves(this);
             }
+        }
+
+
+        if (InCheck)
+        {
+            var activePieces = (CheckedKing.IsWhite) ? WhitePieces : BlackPieces;
+            CheckMate = true;
+            foreach (var piece in activePieces)
+            {
+                if (piece.AvailableCaptures.Count == 0 && piece.AvailableMoves.Count == 0) continue;
+                CheckMate = false;
+            }
+            Winner = (CheckedKing.IsWhite) ? "Black" : "White";
         }
     }
 
