@@ -91,3 +91,4 @@ Thumbs.db
 appsettings.Development.json
 appsettings.Local.json
 secrets.json
+Backend/Domain/Entities/Chess/lichess_db_puzzle.csv

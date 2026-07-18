@@ -5,6 +5,8 @@ import ChessBoardGrid from "../../../components/Chess/ChessBoardGrid";
 import ChessPuzzleProvider from "../../../data/providers/ChessPuzzleProvider";
 import { useChessPuzzle } from "../../../components/Chess/ChessPuzzleContext";
 import { useChessBoard } from "../../../components/Chess/ChessBoardContext";
+import InfoPanel from "../../../components/Chess/InfoPanel";
+import MoveHistory from "../../../components/Chess/MoveHistory";
 
 function ChessPuzzleDisplay() {
     return (
@@ -16,7 +18,7 @@ function ChessPuzzleDisplay() {
 
 function ChessPuzzleInner() {
     const { user } = useAuth();
-    const { currentPuzzle, fetchNewPuzzle, isFetching, hintSquare, revealSolution, isRevealed, isSolved } = useChessPuzzle();
+    const { currentPuzzle, fetchNewPuzzle, isFetching, getHint, hint, revealSolution, isRevealed, isSolved } = useChessPuzzle();
     const { chessGame } = useChessBoard();
     const [selectingTag, setSelectingTag] = useState(false);
 
@@ -70,68 +72,60 @@ function ChessPuzzleInner() {
                     <span className="player-name">{bottomPlayer}</span>
                 </div>
             </div>
+            
 
-            <div className="info-panel border">
-                <h2 className="puzzle-info-heading">Puzzle Info</h2>
+            <InfoPanel
+                title="Puzzle Info"
+                extraStatus={[
+                    { condition: isSolved, className: "status-solved", label: "Puzzle Solved!" },
+                    { condition: isRevealed && !isSolved, className: "status-revealed", label: "Solution revealed" },
+                ]}
+            >
                 <h5 className="puzzle-id">#{currentPuzzle.puzzleId}</h5>
-                <h5 className="rating-badge">Rating: {currentPuzzle.rating}</h5>
-
-                {chessGame.chessBoard.checkMate ? (
-                    <p className="status-line status-checkmate">
-                        Checkmate: {chessGame.chessBoard.winner} wins
-                    </p>
-                ) : chessGame.chessBoard.inCheck ? (
-                    <p className="status-line status-check">Check</p>
-                ) : null}
-
-                {chessGame.chessBoard.lastMove && <h5>Last move: {chessGame.chessBoard.lastMove}</h5>}
 
                 {currentPuzzle.tags?.length > 0 && (
                     <div className="tag-list">
                         {currentPuzzle.tags.map(tag => (
-                            <span key={tag} className="tag-pill">
-                                {tag.replace(/_/g, " ")}
-                            </span>
+                            <span key={tag} className="tag-pill">{tag.replace(/_/g, " ")}</span>
                         ))}
                     </div>
                 )}
-                <h5>Move: {chessGame.chessBoard.fullMoveClock}</h5>
 
-                <div>
-                    {isSolved && (
-                        <div className="status-line status-solved">
-                            Puzzle Solved!
-                        </div>
-                    )}
-                    {isRevealed && !isSolved && (
-                        <div className="status-line status-revealed">
-                            Solution revealed
-                        </div>
-                    )}
+                <h5 className="rating-badge">Rating: {currentPuzzle.rating}</h5>
+
+                <div className="last-move-slot">
+                    {chessGame.chessBoard.lastMove && <h5>Last move: {chessGame.chessBoard.lastMove}</h5>}
                 </div>
+
+
+
+                <MoveHistory chessHistory={[]} viewIndex={null} isViewingHistory={false} setViewIndex={function (index: number | null): void {
+                    throw new Error("Function not implemented.");
+                } } goToPrevious={function (): void {
+                    throw new Error("Function not implemented.");
+                } } goToNext={function (): void {
+                    throw new Error("Function not implemented.");
+                } } goToCurrent={function (): void {
+                    throw new Error("Function not implemented.");
+                } } />
+
+
 
                 <div className="puzzle-actions">
-                    <Button
-                        disabled={isSolved || isRevealed || !hintSquare}
-                    >
-                        Hint
-                    </Button>
-                    <Button
-                        onClick={revealSolution}
-                        disabled={isSolved || isRevealed}
-                    >
-                        Reveal Solution
-                    </Button>
-                    <Button onClick={handleNextPuzzle} disabled={isFetching}>
-                        {isFetching ? "Loading..." : "Next Puzzle"}
-                    </Button>
+                    <Button variant="secondary" onClick={getHint} disabled={isSolved || isRevealed || !hint} className="w-19">Hint</Button>
+                    <Button variant="secondary" onClick={revealSolution} disabled={isSolved || isRevealed}>Reveal Solution</Button>
                 </div>
+                <Button variant="secondary" onClick={handleNextPuzzle} disabled={isFetching}>
+                    {isFetching ? "Loading..." : "Next Puzzle"}
+                </Button>
+
 
                 <div className="puzzle-stats">
                     <span>{currentPuzzle.nbPlays.toLocaleString()} plays</span>
                     <span>{currentPuzzle.popularity}% popularity</span>
                 </div>
-            </div>
+            </InfoPanel>
+
         </div>
     );
 }

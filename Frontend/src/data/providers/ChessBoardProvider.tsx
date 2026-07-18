@@ -10,6 +10,7 @@ import { PieceType } from '../../components/Chess/ChessTypes';
 import { ChessBoardContext, type ChessBoardContextValue } from '../../components/Chess/ChessBoardContext';
 import { useAuth } from './AuthProvider';
 import * as signalR from '@microsoft/signalr';
+import { useHistoryNavigation } from '../../hooks/chess/useHistoryNavigation';
 
 type ChessBoardProviderProps = {
     children: ReactNode;
@@ -19,46 +20,48 @@ type ChessBoardProviderProps = {
 
 
 function buildOptimisticGame(game: ChessGame, from: ChessPiece, to: ChessPiece): ChessGame {
-    const newBoard = game.ChessBoard.GameBoard.map(rank => rank.map(p => ({ ...p })));
+    const newBoard = game.chessBoard.gameBoard.map(rank => rank.map(p => ({ ...p })));
 
     const findCell = (pos: string) => {
         for (const rank of newBoard) {
-            const cell = rank.find(p => p.Position === pos);
+            const cell = rank.find(p => p.position === pos);
             if (cell) return cell;
         }
         return null;
     };
 
-    const fromCell = findCell(from.Position);
-    const toCell = findCell(to.Position);
+    const fromCell = findCell(from.position);
+    const toCell = findCell(to.position);
     if (!fromCell || !toCell) return game;
 
-    toCell.Type = fromCell.Type;
-    toCell.IsWhite = fromCell.IsWhite;
-    toCell.AvailableMoves = [];
-    toCell.AvailableCaptures = [];
-    toCell.Attackers = [];
-    toCell.Defenders = [];
-    toCell.Pinned = false;
-    toCell.PinnedSquares = [];
+    toCell.type = fromCell.type;
+    toCell.isWhite = fromCell.isWhite;
+    toCell.availableMoves = [];
+    toCell.availableCaptures = [];
+    toCell.attackers = [];
+    toCell.defenders = [];
+    toCell.pinned = false;
+    toCell.pinnedSquares = [];
 
-    fromCell.Type = PieceType.Empty;
-    fromCell.AvailableMoves = [];
-    fromCell.AvailableCaptures = [];
-    fromCell.Attackers = [];
-    fromCell.Defenders = [];
-    fromCell.Pinned = false;
-    fromCell.PinnedSquares = [];
+    fromCell.type = PieceType.empty;
+    fromCell.availableMoves = [];
+    fromCell.availableCaptures = [];
+    fromCell.attackers = [];
+    fromCell.defenders = [];
+    fromCell.pinned = false;
+    fromCell.pinnedSquares = [];
 
-    const newTurn = game.ChessBoard.Turn === 'w' ? 'b' : 'w';
+    const newTurn = game.chessBoard.turn === 'w' ? 'b' : 'w';
 
     return {
         ...game,
-        ChessBoard: {
-            ...game.ChessBoard,
-            GameBoard: newBoard,
-            Turn: newTurn,
-            LastMove: `${from.Position}-${to.Position}`,
+        chessBoard: {
+            ...game.chessBoard,
+            gameBoard: newBoard,
+            turn: newTurn,
+            lastMove: `${from.position},${to.position}`,
+            inCheck: false,
+            checkMate: false
         },
     };
 }
@@ -76,6 +79,17 @@ function ChessBoardProvider({
     const { user } = useAuth();
     const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
 
+    const {
+        viewIndex,
+        setViewIndex,
+        goToPrevious,
+        goToNext,
+        goToCurrent,
+        snapToLive,
+        isViewingHistory,
+        displayedBoard,
+    } = useHistoryNavigation(chessHistory, chessGame?.chessBoard ?? null);
+
     // update chess game
     const handleSetChessGame = useCallback((game: ChessGame) => {
         if (game === null) return;
@@ -87,9 +101,10 @@ function ChessBoardProvider({
         }
 
         setChessGame(game);
+        setChessHistory(prev => [...prev, game.chessBoard]);
         setIsMoving(false);
-        console.log("Setting chess game:", game);
-    }, [user]);
+        snapToLive();  // if viewing history, go to live game
+    }, [user, snapToLive]);
 
     // signal r
     useEffect(() => {
@@ -219,11 +234,20 @@ function ChessBoardProvider({
             setActivePlayer,
             gameMode: selectedGameOptions?.gameMode || null,
             chessHistory,
+            viewIndex,
+            setViewIndex,
+            goToPrevious,
+            goToNext,
+            goToCurrent,
+            isViewingHistory,
+            displayedBoard,
             isMoving,
             attack,
             selectedGameOptions,
         }),
-        [chessGame, selectedPiece, promotionInfo, activePlayer, chessHistory, isMoving, attack, selectedGameOptions]
+        [chessGame, selectedPiece, promotionInfo, activePlayer, chessHistory, viewIndex,
+        setViewIndex, goToPrevious, goToNext, goToCurrent, isViewingHistory, displayedBoard,
+        isMoving, attack, selectedGameOptions]
     );
 
     return (

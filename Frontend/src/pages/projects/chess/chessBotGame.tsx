@@ -27,7 +27,7 @@ function ChessBotGame() {
                     <Button
                         className="w-20 relative overflow-hidden transition-transform"
                         onClick={() => {
-                            setOptions(options => ({...options, SelectedColor: "white"}));
+                            setOptions(options => ({...options, selectedColor: "white"}));
                             setStarted(true);
                         }} > White
                         <span className="absolute bottom-0 left-0 w-full h-1.5"
@@ -37,7 +37,7 @@ function ChessBotGame() {
 
                     <Button className="w-20 relative overflow-hidden transition-transform"
                             onClick={() => {
-                                setOptions(options => ({...options, SelectedColor: "black"}));
+                                setOptions(options => ({...options, selectedColor: "black"}));
                                 setStarted(true);
                             }} > 
                         Black
@@ -48,7 +48,7 @@ function ChessBotGame() {
 
                     <Button className="w-20 relative overflow-hidden transition-transform"
                         onClick={() => {
-                            setOptions(options => ({...options, SelectedColor: Math.random() < 0.5 ? "white" : "black"}));
+                            setOptions(options => ({...options, selectedColor: Math.random() < 0.5 ? "white" : "black"}));
                             setStarted(true);
                         }}
                     > Random
@@ -72,7 +72,7 @@ function ChessBotGame() {
     return (
         <div>
             <ChessBoard selectedGameOptions={options}>
-                <ChessBoardDisplay key={"freeplay"}/>
+                <ChessBoardDisplay key={"bot"}/>
             </ChessBoard>
         </div>
     )

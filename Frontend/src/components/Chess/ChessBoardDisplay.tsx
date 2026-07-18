@@ -4,16 +4,27 @@ import { PieceType, type ChessPiece } from './ChessTypes';
 import PieceDisplay from './PieceDisplay';
 import { useChessBoard } from './ChessBoardContext';
 import ChessBoardGrid from './ChessBoardGrid';
+import InfoPanel from './InfoPanel';
+import { Button } from '../Button';
+import { useEffect, useRef } from 'react';
+import MoveHistory from './MoveHistory';
 
 // props for component
 
 function  ChessBoardDisplay() {
     const { user } = useAuth();
-    const { chessGame, chessHistory } = useChessBoard();
+    const { chessGame, chessHistory, viewIndex, isViewingHistory, goToPrevious, goToNext, goToCurrent, setViewIndex } = useChessBoard();
+    const currentRowRef = useRef<HTMLDivElement>(null);
+
+    const currentIndex = viewIndex === null ? chessHistory.length - 1 : viewIndex;
+
+    useEffect(() => {
+        currentRowRef.current?.scrollIntoView({ block: 'nearest' });
+    }, [currentIndex]);
 
     if (user) {
         if (!chessGame) return <p>Loading...</p>;
-        const { gameBoard, turn } = chessGame.chessBoard;
+        const { turn } = chessGame.chessBoard;
 
         const isUserWhite = chessGame.players[0] === user.username; // adjust property if needed
 
@@ -49,32 +60,23 @@ function  ChessBoardDisplay() {
                     </div>
                 </div>
 
-                <div className="info-panel border">
-                    <h2>Game Info</h2>
-
-                    {chessGame.chessBoard.checkMate ? (
-                        <p className="status-line status-checkmate">
-                            Checkmate: {chessGame.chessBoard.winner} wins
-                        </p>
-                    ) : chessGame.chessBoard.inCheck ? (
-                        <p className="status-line status-check">Check</p>
-                    ) : null}
-
+                <InfoPanel title="Game Info">
                     <h5>Game mode: {chessGame.gameType}</h5>
                     <h5>Move: {chessGame.chessBoard.fullMoveClock}</h5>
                     {chessGame.chessBoard.lastMove && <h5>Last move: {chessGame.chessBoard.lastMove}</h5>}
-
                     <p className="game-id">Game ID: {chessGame.id}</p>
 
-                    <div className="move-history border">
-                        {chessHistory?.map((game, i) => (
-                            <div key={i} className={`history-row ${i === chessHistory.length - 1 ? 'current' : ''}`}>
-                                <span className="move-number">{i + 1}</span>
-                                <span>{game.fEN}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                    <MoveHistory
+                        chessHistory={chessHistory}
+                        viewIndex={viewIndex}
+                        isViewingHistory={isViewingHistory}
+                        setViewIndex={setViewIndex}
+                        goToPrevious={goToPrevious}
+                        goToNext={goToNext}
+                        goToCurrent={goToCurrent}
+                    />
+
+                </InfoPanel>
             </div>
         );
     } else { // NO USER
@@ -99,7 +101,7 @@ function  ChessBoardDisplay() {
             <div className="wrapper" style={{ position: 'relative' }}>
                 <div className="chessboard">
                     {storeEmpties.map((piece) => (
-                        <PieceDisplay key={piece.position} piece={piece} />
+                        <PieceDisplay key={piece.position} piece={piece} squareClass={""} pieceClass={""} color={""} isMove={false} isTarget={false} />
                     ))}
                 </div>
 

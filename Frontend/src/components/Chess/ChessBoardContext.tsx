@@ -9,6 +9,13 @@ export type ChessBoardContextValue = {
     activePlayer: string | null;
     gameMode: ChessGameMode | null;
     chessHistory: ChessBoard[];
+    viewIndex: number | null;
+    setViewIndex: (index: number | null) => void;
+    goToPrevious: () => void;
+    goToNext: () => void;
+    goToCurrent: () => void;
+    isViewingHistory: boolean;
+    displayedBoard: ChessBoard | null;
     isMoving: boolean;
     attack: (clickedPiece: ChessPiece) => void;
     setActivePlayer: (activePlayer: string | null) => void;

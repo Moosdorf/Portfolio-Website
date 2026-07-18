@@ -6,7 +6,8 @@ export type ChessPuzzleContextValue = {
     currentPuzzle: ChessPuzzle | null;
     fetchNewPuzzle: () => Promise<void>;
     isFetching: boolean;
-    hintSquare: string | null;
+    hint: string | null;
+    getHint: () => void;
     revealSolution: () => void;
     isRevealed: boolean;
     isSolved: boolean;

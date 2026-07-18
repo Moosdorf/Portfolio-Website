@@ -1,9 +1,10 @@
-// data/providers/ChessPuzzleProvider.tsx
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { ChessBoardContext, type ChessBoardContextValue } from '../../components/Chess/ChessBoardContext';
 import { ChessGameMode, type ChessGame, type ChessPiece, type ChessPuzzle, type PromotionInformation } from '../../components/Chess/ChessTypes';
 import { useAuth } from '../../data/providers/AuthProvider';
 import { ChessPuzzleContext } from '../../components/Chess/ChessPuzzleContext';
+import { useHistoryNavigation } from '../../hooks/chess/useHistoryNavigation';
+
 
 type ChessPuzzleProviderProps = {
     children: ReactNode;
@@ -18,15 +19,32 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     const [moveIndex, setMoveIndex] = useState(0);
     const [isMoving, setIsMoving] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
-    const [isBlack, setIsBlack] = useState(false);
-    const [isRevealed, setIsRevealed] = useState(false); // user hit "reveal solution"
+    const [isRevealed, setIsRevealed] = useState(false);
+    const [hint, setHint] = useState<string | null>(null);
 
     const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+    // the "played so far" slice of the puzzle's full solution — this IS the puzzle's chessHistory
+    const chessHistory = useMemo(
+        () => chessPuzzle ? chessPuzzle.chessBoards.slice(0, moveIndex + 1) : [],
+        [chessPuzzle, moveIndex]
+    );
+
+    const {
+        viewIndex,
+        setViewIndex,
+        goToPrevious,
+        goToNext,
+        goToCurrent,
+        snapToLive,
+        isViewingHistory,
+        displayedBoard,
+    } = useHistoryNavigation(chessHistory, currentChessGame?.chessBoard ?? null);
 
     const fetchNewPuzzle = useCallback(async () => {
         setIsFetching(true);
         try {
-            const res = await fetch(`https://localhost:5270/api/puzzle/random`, { 
+            const res = await fetch(`https://localhost:5270/api/puzzle/random`, {
                 method: 'GET',
                 credentials: 'include'
              });
@@ -35,10 +53,10 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             const puzzle: ChessPuzzle = await res.json();
             setChessPuzzle(puzzle);
             setIsRevealed(false);
+            setHint(null);
 
-            console.log(puzzle)
             const initialBoard = puzzle.chessBoards[0];
-            setIsBlack(!!user && initialBoard.turn === 'b');
+            const username = user?.username ?? 'guest';
 
             const startingGame = {
                 chessBoard: initialBoard,
@@ -46,8 +64,8 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
                 sessionId: "",
                 gameType: "Puzzle",
                 players: [
-                    initialBoard.turn === "b" ? user.username : "puzzle",
-                    initialBoard.turn === "w" ? user.username : "puzzle",
+                    initialBoard.turn === "b" ? username : "puzzle",
+                    initialBoard.turn === "w" ? username : "puzzle",
                 ],
                 moves: [],
                 fenList: [puzzle.fEN],
@@ -55,34 +73,30 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             } satisfies ChessGame;
 
             setCurrentChessGame(startingGame);
-            setMoveIndex(0);
             setIsFetching(false);
+            setMoveIndex(0);
+            snapToLive();
 
             await sleep(1000);
 
             setCurrentChessGame({ ...startingGame, chessBoard: puzzle.chessBoards[1] });
             setMoveIndex(1);
+            snapToLive();
 
         } catch (err) {
             console.error('Failed to fetch chess board:', err);
             setIsFetching(false);
         }
-    }, [user]);
+    }, [user, snapToLive]);
 
     const attack = useCallback(async (clickedPiece: ChessPiece) => {
-        console.log("chess?=")
-        console.log(currentChessGame)
-        if (!currentChessGame || !chessPuzzle || !selectedPiece || isMoving) {
+        if (!isSolved || isViewingHistory || !currentChessGame || !chessPuzzle || !selectedPiece || isMoving) {
             setSelectedPiece(null);
             return;
         }
 
         const attempted = `${selectedPiece.position},${clickedPiece.position}`;
-        console.log("attack")
-        console.log(attempted)
-        const startIndex = moveIndex;
-        const expected = chessPuzzle.moves[startIndex];
-        console.log(expected)
+        const expected = chessPuzzle.moves[moveIndex];
 
         if (attempted !== expected) {
             setSelectedPiece(null);
@@ -92,41 +106,51 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         setIsMoving(true);
         setSelectedPiece(null);
 
-        const afterUserIndex = startIndex + 1;
+        const afterPlayerIndex = moveIndex + 1;
         setCurrentChessGame(prev =>
-            prev ? { ...prev, ChessBoard: chessPuzzle.chessBoards[afterUserIndex] } : prev
+            prev ? { ...prev, chessBoard: chessPuzzle.chessBoards[afterPlayerIndex] } : prev
         );
-        setMoveIndex(afterUserIndex);
+        setMoveIndex(afterPlayerIndex);
+        snapToLive();
 
-        if (afterUserIndex < chessPuzzle.moves.length) {
+        let nextMoveIndex = afterPlayerIndex;
+
+        if (afterPlayerIndex < chessPuzzle.moves.length) {
             await sleep(1000);
-            const afterComputerIndex = afterUserIndex + 1;
+            const afterComputerIndex = afterPlayerIndex + 1;
             setCurrentChessGame(prev =>
-                prev ? { ...prev, ChessBoard: chessPuzzle.chessBoards[afterComputerIndex] } : prev
+                prev ? { ...prev, chessBoard: chessPuzzle.chessBoards[afterComputerIndex] } : prev
             );
-            setMoveIndex(afterComputerIndex);
+            nextMoveIndex = afterComputerIndex;
+            snapToLive();
         }
 
+        setMoveIndex(nextMoveIndex);
         setIsMoving(false);
-    }, [currentChessGame, chessPuzzle, selectedPiece, moveIndex, isMoving]);
+    }, [currentChessGame, chessPuzzle, selectedPiece, moveIndex, isMoving, isViewingHistory, snapToLive]);
 
 
     const revealSolution = useCallback(() => {
         if (!chessPuzzle) return;
         const finalIndex = chessPuzzle.chessBoards.length - 1;
         setCurrentChessGame(prev =>
-            prev ? { ...prev, ChessBoard: chessPuzzle.chessBoards[finalIndex] } : prev
+            prev ? { ...prev, chessBoard: chessPuzzle.chessBoards[finalIndex] } : prev
         );
         setMoveIndex(chessPuzzle.moves.length);
         setSelectedPiece(null);
         setIsRevealed(true);
-    }, [chessPuzzle]);
+        snapToLive();
+    }, [chessPuzzle, snapToLive]);
 
     const hintSquare = useMemo(() => {
         if (!chessPuzzle || isMoving) return null;
         const nextMove = chessPuzzle.moves[moveIndex];
         return nextMove ? nextMove.split(',')[0] : null;
     }, [chessPuzzle, moveIndex, isMoving]);
+
+    const getHint = useCallback(() => {
+        setHint(hintSquare);
+    }, [hintSquare]);
 
     const isSolved = useMemo(
         () => !!chessPuzzle && moveIndex >= chessPuzzle.moves.length && !isRevealed,
@@ -142,18 +166,29 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         activePlayer: user?.username ?? null,
         setActivePlayer: () => {},
         gameMode: ChessGameMode.puzzle,
-        chessHistory: [],
+        chessHistory,
+        viewIndex,
+        setViewIndex,
+        goToPrevious,
+        goToNext,
+        goToCurrent,
+        isViewingHistory,
+        displayedBoard,
         isMoving,
-        isBlack,
         attack,
-    }), [currentChessGame, selectedPiece, promotionInfo, isMoving, isBlack, attack, user]);
+    }), [
+        currentChessGame, selectedPiece, promotionInfo, user, chessHistory, viewIndex,
+        setViewIndex, goToPrevious, goToNext, goToCurrent, isViewingHistory, displayedBoard,
+        isMoving, attack
+    ]);
 
     return (
         <ChessPuzzleContext.Provider value={{
             currentPuzzle: chessPuzzle ?? null,
             fetchNewPuzzle,
             isFetching,
-            hintSquare,
+            hint,
+            getHint,
             revealSolution,
             isRevealed,
             isSolved,

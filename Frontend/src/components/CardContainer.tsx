@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CardData } from "../data/CardData";
 import Card from "./Card"
-type Props = {
-    projects: CardData[] | undefined;
-}
+
 
 
 function CardContainer() {
@@ -24,7 +22,6 @@ function CardContainer() {
     }, [])
 
 
-    if (projects == undefined) return (<>error</>)
     if (fetching) {
         return (
         <div className="projects-page p-5">
@@ -33,6 +30,7 @@ function CardContainer() {
         )
     }
     
+    if (projects == undefined) return;
     return (
         <div className="card-container border border-gray-300 rounded-lg p-8
                         flex flex-col items-center gap-6
