@@ -30,9 +30,9 @@ function ChessProject() {
             <p>This project focused on creating a chess-game from scratch, including multi-player games, bot-games and puzzles. </p>
             <div className="flex gap-4 justify-center max-w-4xl mx-auto p-20">
                 {/*<Button onClick={() => setGameMode(ChessGameMode.Multiplayer)}>Multiplayer game</Button>*/}
-                <Link to="/projects/chess/bot"><Button>Bot game</Button></Link>
-                <Link to="/projects/chess/puzzle"><Button>Solve puzzles</Button></Link>
-                <Link to="/projects/chess/freeplay"><Button>Freeplay</Button></Link>
+                <Link to="/projects/chess/bot"><Button variant="secondary">Bot game</Button></Link>
+                <Link to="/projects/chess/puzzle"><Button variant="secondary">Solve puzzles</Button></Link>
+                <Link to="/projects/chess/freeplay"><Button variant="secondary">Freeplay</Button></Link>
             </div>
         </div>
     )

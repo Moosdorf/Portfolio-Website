@@ -34,6 +34,34 @@
 }
 
 /* ============================== */
+/* Selection Panel                 */
+/* ============================== */
+
+.selection-panel {
+  background: #1e1e1e;
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 32rem;
+  margin: 2rem auto;
+}
+
+.selection-panel h3,
+.selection-panel h4 {
+  color: white;
+  font-weight: 600;
+}
+
+.selection-panel .selection-title {
+  text-decoration: underline;
+}
+
+/* ============================== */
 /* Board + Outside Labels          */
 /* ============================== */
 

@@ -35,15 +35,14 @@ function Navbar() {
 
     return (
       <>
-        <nav className="bg-gray-900 px-6 py-4 relative">
+        <nav className="bg-gray-900 px-6 py-1 relative sticky top-0 z-50">
           <div className="flex items-center justify-between">
 
             {/* Logo */}
-            <Link to="/" className="text-xl font-bold">picture</Link>
+            <Link to="/" className="text-xl font-bold">Home</Link>
 
             {/* Nav links  ml-auto pushes them to the right */}
             <ul className="hidden sm:flex gap-6 items-center ml-auto mr-4">
-              <li><Link to="/education" className="hover:text-gray-100">Education</Link></li>
               <li><Link to="/account" className="hover:text-gray-100">Account</Link></li>
             </ul>
 
@@ -68,7 +67,6 @@ function Navbar() {
           {/* the dropdown menu */}
           <div id="dropdown"className={`border border-gray-600 rounded-md w-35 bg-gray-500 ${toggleMenu ? 'block' : 'hidden'} absolute right-5 top-full z-50 -mt-4`}>
             <ul className="py-2 p-1">
-              <li onClick={() => setToggleMenu(false)}><Link to="/education" className="block py-1 hover:bg-gray-400 rounded">Education</Link></li>
               <li onClick={() => setToggleMenu(false)}><Link to="/account" className="block py-1 hover:bg-gray-400 rounded">Account</Link></li>
               {user && <li onClick={() => setToggleMenu(false)}><Link onClick={() => logout()} to="/account" className="block border border-red-300 py-1 hover:bg-red-400 rounded">Log Out</Link></li>}
               </ul>

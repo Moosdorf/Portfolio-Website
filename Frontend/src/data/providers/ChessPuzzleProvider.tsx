@@ -54,6 +54,7 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             setChessPuzzle(puzzle);
             setIsRevealed(false);
             setHint(null);
+            console.log(puzzle)
 
             const initialBoard = puzzle.chessBoards[0];
             const username = user?.username ?? 'guest';
@@ -90,7 +91,8 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     }, [user, snapToLive]);
 
     const attack = useCallback(async (clickedPiece: ChessPiece) => {
-        if (!isSolved || isViewingHistory || !currentChessGame || !chessPuzzle || !selectedPiece || isMoving) {
+
+        if (isSolved || isViewingHistory || !currentChessGame || !chessPuzzle || !selectedPiece || isMoving) {
             setSelectedPiece(null);
             return;
         }

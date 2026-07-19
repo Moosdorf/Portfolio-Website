@@ -27,10 +27,7 @@ function MoveHistory({
     useEffect(() => {
         currentRowRef.current?.scrollIntoView({ block: 'nearest' });
     }, [currentIndex]);
-
-    console.log("index time")
-    console.log(viewIndex)
-
+    
     return (
         <>
 

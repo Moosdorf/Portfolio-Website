@@ -7,16 +7,18 @@ import { useChessPuzzle } from "../../../components/Chess/ChessPuzzleContext";
 import { useChessBoard } from "../../../components/Chess/ChessBoardContext";
 import InfoPanel from "../../../components/Chess/InfoPanel";
 import MoveHistory from "../../../components/Chess/MoveHistory";
+import SelectionPanel from "../../../components/SelectionPanel";
+import { Link } from "react-router-dom";
 
-function ChessPuzzleDisplay() {
+function ChessPuzzle() {
     return (
         <ChessPuzzleProvider>
-            <ChessPuzzleInner />
+            <ChessPuzzleDisplay />
         </ChessPuzzleProvider>
     );
 }
 
-function ChessPuzzleInner() {
+function ChessPuzzleDisplay() {
     const { user } = useAuth();
     const { currentPuzzle, fetchNewPuzzle, isFetching, getHint, hint, revealSolution, isRevealed, isSolved } = useChessPuzzle();
     const { chessGame } = useChessBoard();
@@ -25,21 +27,24 @@ function ChessPuzzleInner() {
     if (currentPuzzle == null) {
         if (selectingTag) {
             return (
-                <div className="flex flex-col items-center gap-6 max-w-4xl mx-auto p-10 bg-gray-400 rounded-xl shadow-md">
-                    <h3 className="text-black font-bold text-lg tracking-wide">Chess Tags</h3>
-                </div>
+                <></>
             );
         }
 
         return (
-            <div className="flex flex-col items-center gap-6 max-w-4xl mx-auto p-10 bg-gray-400 rounded-xl shadow-md">
-                <h3 className="text-black font-bold text-lg tracking-wide">Puzzles</h3>
-                <Button onClick={() => fetchNewPuzzle()} disabled={!user || isFetching}>
-                    {isFetching ? "Loading..." : "Random Puzzle"}
-                </Button>
-                <Button>Rated Puzzles</Button>
-                <Button onClick={() => setSelectingTag(true)}>Puzzle Tags</Button>
-            </div>
+            <SelectionPanel title="Puzzles" subtitle="Select Gamemode">
+                <div className="flex gap-4 justify-center">
+                    <Button variant="secondary" onClick={() => fetchNewPuzzle()} disabled={!user || isFetching}>
+                        {isFetching ? "Loading..." : "Random Puzzle"}
+                    </Button>
+                    <Button variant="secondary">Rated Puzzles</Button>
+                    <Button variant="secondary" onClick={() => setSelectingTag(true)}>Puzzle Tags</Button>
+                </div>
+
+                <Link to="/projects/chess">
+                    <Button variant="secondary">Back</Button>
+                </Link>
+            </SelectionPanel>
         );
     }
 
@@ -94,7 +99,7 @@ function ChessPuzzleInner() {
                 <h5 className="rating-badge">Rating: {currentPuzzle.rating}</h5>
 
                 <div className="last-move-slot">
-                    {chessGame.chessBoard.lastMove && <h5>Last move: {chessGame.chessBoard.lastMove}</h5>}
+                    {<h5>Last move: {chessGame.chessBoard.lastMove && chessGame.chessBoard.lastMove}</h5>}
                 </div>
 
 
@@ -130,4 +135,4 @@ function ChessPuzzleInner() {
     );
 }
 
-export default ChessPuzzleDisplay;
+export default ChessPuzzle;

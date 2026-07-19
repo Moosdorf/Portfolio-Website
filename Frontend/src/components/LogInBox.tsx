@@ -28,16 +28,15 @@ function LogInBox() {
                 )}
                 {mode === "login" && (
                     <LoginForm
-                        onSubmit={login} 
+                        onSubmit={login}
                         onSwitch={() => {
-                            setMode(null)
-                            resetErrors()
-                        }} 
+                            setMode(null);
+                            resetErrors();
+                        } }
                         fetchingPassword={fetchingData}
                         validatePassword={validatePassword}
                         passwordWeak={passwordWeak}
-                        loginSuccessful={loginSuccessful}
-                         
+                        loginSuccessful={loginSuccessful} errorMessage={""}                         
                          />
                 )}
                 {mode === "create" && (

@@ -72,6 +72,7 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
     };
 
     const handleOnClick = (clickedPiece: ChessPiece) => {
+        
         if (isViewingHistory || isMoving || promotionInfo) return;
         if (CheckForPromotion(clickedPiece)) return;
 
@@ -79,13 +80,14 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
             addSelected(clickedPiece);
             return;
         }
+
         if (clickedPiece === selectedPiece) {
             removeSelected();
             return;
         }
 
         // if the clicked piece belongs to the same side, reselect it instead of attacking
-        if (clickedPiece.isWhite === selectedPiece.isWhite) {
+        if (clickedPiece.isWhite === selectedPiece.isWhite && clickedPiece.type !== PieceType.empty) {
             addSelected(clickedPiece);
             return;
         }
@@ -137,9 +139,6 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
         }
         return false;
     }
-
-
-
 
 
     return (

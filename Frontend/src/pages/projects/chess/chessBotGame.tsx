@@ -1,10 +1,11 @@
 import { useState } from "react";
-import ChessBoard from "../../../data/providers/ChessBoardProvider"
+import ChessBoardProvider from "../../../data/providers/ChessBoardProvider"
 import ChessBoardDisplay from "../../../components/Chess/ChessBoardDisplay"
 import { ChessGameMode, type SelectedGameOptions } from "../../../components/Chess/ChessTypes";
 import { useAuth } from "../../../data/providers/AuthProvider";
 import { Button } from "../../../components/Button";
 import { Link } from "react-router-dom";
+import SelectionPanel from "../../../components/SelectionPanel";
 
 function ChessBotGame() {
     const { user } = useAuth()
@@ -19,12 +20,9 @@ function ChessBotGame() {
 
     if (!started) {
         return (
-            <div className="flex flex-col items-center gap-6 max-w-4xl mx-auto p-10 bg-gray-400 rounded-xl shadow-md">
-                <h3 className="text-black font-bold text-lg tracking-wide">Bot Game</h3>
-                <h4 className="text-black font-bold text-lg tracking-wide">Select your color</h4>
-
+            <SelectionPanel title="Bot Game" subtitle="Select your color">
                 <div className="flex gap-4 justify-center">
-                    <Button
+                    <Button variant="secondary"
                         className="w-20 relative overflow-hidden transition-transform"
                         onClick={() => {
                             setOptions(options => ({...options, selectedColor: "white"}));
@@ -35,7 +33,7 @@ function ChessBotGame() {
                         />
                     </Button>
 
-                    <Button className="w-20 relative overflow-hidden transition-transform"
+                    <Button variant="secondary" className="w-20 relative overflow-hidden transition-transform"
                             onClick={() => {
                                 setOptions(options => ({...options, selectedColor: "black"}));
                                 setStarted(true);
@@ -46,7 +44,7 @@ function ChessBotGame() {
                         />
                     </Button>
 
-                    <Button className="w-20 relative overflow-hidden transition-transform"
+                    <Button variant="secondary" className="w-20 relative overflow-hidden transition-transform"
                         onClick={() => {
                             setOptions(options => ({...options, selectedColor: Math.random() < 0.5 ? "white" : "black"}));
                             setStarted(true);
@@ -61,19 +59,17 @@ function ChessBotGame() {
                 </div>
 
                 <Link to="/projects/chess">
-                    <Button>
-                        Back
-                    </Button>
+                    <Button variant="secondary">Back</Button>
                 </Link>
-            </div>
+            </SelectionPanel>
         )
     }
 
     return (
         <div>
-            <ChessBoard selectedGameOptions={options}>
+            <ChessBoardProvider selectedGameOptions={options}>
                 <ChessBoardDisplay key={"bot"}/>
-            </ChessBoard>
+            </ChessBoardProvider>
         </div>
     )
         
