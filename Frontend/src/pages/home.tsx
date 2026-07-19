@@ -2,7 +2,7 @@ import ProjectContainer from "../components/ProjectContainer";
 
 function Home() {
   return (
-    <div className="max-w-6xl mx-auto p-5 space-y-6">
+    <div className="w-7/12 mx-auto p-5 space-y-6">
       <h1 className="text-2xl font-bold">Andreas Moosdorf's Portfolio</h1>
 
       <ProjectContainer />

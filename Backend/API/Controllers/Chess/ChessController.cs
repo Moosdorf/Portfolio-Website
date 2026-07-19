@@ -34,14 +34,25 @@ public class ChessController : HomeController
         _scopeFactory = scopeFactory;
     }
 
-    // get game
     [HttpGet]
     [Route("{id}")]
     public async Task<IActionResult> GetGameState(int id)
     {
         ChessGame? game = await chessDataService.GetGameAsync(id);
         if (game == null) return NotFound("Cannot find game");
-        return Ok(chessDataService.CreateChessModel(new ChessBoard(game.CurrentFEN), game, "non"));
+
+        var username = User.FindFirstValue(ClaimTypes.Name);
+        var role = ResolveRole(game, username);
+
+        return Ok(chessDataService.CreateChessModel(new ChessBoard(game.CurrentFEN), game, role));
+    }
+
+    private string ResolveRole(ChessGame game, string? username)
+    {
+        if (username == null) return "spectator";
+        if (game.WhiteUsername == username) return "white"; // adjust to your actual ChessGame property names
+        if (game.BlackUsername == username) return "black";
+        return "spectator";
     }
 
     // create bot game

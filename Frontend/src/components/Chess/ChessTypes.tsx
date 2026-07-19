@@ -39,9 +39,9 @@ export interface PromotionSquare {
 }
 
 export type PromotionInformation = {
-    from: ChessPiece,
-    to: ChessPiece,
-    promotion: PromotionType
+    from: ChessPiece;
+    to: ChessPiece;
+    options: PromotionSquare[]; 
 };
 
 

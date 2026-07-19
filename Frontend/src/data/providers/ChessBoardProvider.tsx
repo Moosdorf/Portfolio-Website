@@ -5,7 +5,7 @@ import {
     useState,
     type ReactNode,
 } from 'react';
-import type { ChessBoard, ChessGame, ChessPiece, PromotionInformation, SelectedGameOptions } from '../../components/Chess/ChessTypes';
+import type { ChessBoard, ChessGame, ChessPiece, PromotionInformation, PromotionType, SelectedGameOptions } from '../../components/Chess/ChessTypes';
 import { PieceType } from '../../components/Chess/ChessTypes';
 import { ChessBoardContext, type ChessBoardContextValue } from '../../components/Chess/ChessBoardContext';
 import { useAuth } from './AuthProvider';
@@ -15,6 +15,7 @@ import { useHistoryNavigation } from '../../hooks/chess/useHistoryNavigation';
 type ChessBoardProviderProps = {
     children: ReactNode;
     selectedGameOptions: SelectedGameOptions;
+    gameId?: string;
 };
 
 
@@ -69,6 +70,7 @@ function buildOptimisticGame(game: ChessGame, from: ChessPiece, to: ChessPiece):
 function ChessBoardProvider({
     children,
     selectedGameOptions,
+    gameId 
 }: ChessBoardProviderProps) {
     const [chessGame, setChessGame] = useState<ChessGame | null>(null);
     const [chessHistory, setChessHistory] = useState<ChessBoard[]>([]);
@@ -108,40 +110,53 @@ function ChessBoardProvider({
 
     // signal r
     useEffect(() => {
-        console.log("signalr")
         const conn = new signalR.HubConnectionBuilder()
             .withUrl('https://localhost:5270/hubs/chess', { withCredentials: true })
             .withAutomaticReconnect()
             .build();
 
         conn.on('BoardUpdated', (game: ChessGame) => {
-            console.log("update???")
-            console.log(game)
             handleSetChessGame(game);
         });
 
-        conn.start()
-            .then(() => conn.invoke('JoinGame', chessGame?.id.toString()))
-            .catch(err => console.error('SignalR connection error:', err));
-
+        conn.start().catch(err => console.error('SignalR connection error:', err));
         setConnection(conn);
-        console.log(conn)
 
         return () => {
-            conn.invoke('LeaveGame', chessGame?.id.toString()).catch(() => {});
             conn.stop();
         };
-    }, [chessGame?.id, handleSetChessGame]);
+    }, [handleSetChessGame]); // connection lifecycle only — set up once
 
-    // create new game
     useEffect(() => {
-        async function createNewGame() {
+        if (!connection || connection.state !== signalR.HubConnectionState.Connected || !chessGame?.id) return;
+
+        connection.invoke('JoinGame', chessGame.id.toString()).catch(err => console.error('JoinGame failed:', err));
+
+        return () => {
+            connection.invoke('LeaveGame', chessGame.id.toString()).catch(() => {});
+        };
+    }, [connection, chessGame?.id]);
+
+    useEffect(() => {
+        async function loadOrCreateGame() {
             try {
-                console.log("Creating new game with options:", selectedGameOptions);
                 if (!user) return;
 
-                let body = JSON.stringify({})
-                console.log(selectedGameOptions?.selectedColor)
+                if (gameId) {
+                    // load existing game
+                    const res = await fetch(`https://localhost:5270/api/chess/${gameId}`, {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    if (!res.ok) throw new Error(`Failed to load game: ${res.status}`);
+                    const game: ChessGame = await res.json();
+                    handleSetChessGame(game);
+                    return;
+                }
+
+                // no id — create new game (existing logic)
+                let body = JSON.stringify({});
                 if (selectedGameOptions?.selectedColor === "white") {
                     body = JSON.stringify({
                         GameMode: selectedGameOptions?.gameMode,
@@ -159,15 +174,10 @@ function ChessBoardProvider({
                 const res = await fetch(`https://localhost:5270/api/Chess/new/`, {
                     method: 'POST',
                     credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: body,
+                    headers: { 'Content-Type': 'application/json' },
+                    body,
                 });
-                if (!res.ok) {
-                    throw new Error(`Failed to load board: ${res.status}`);
-                }
-
+                if (!res.ok) throw new Error(`Failed to load board: ${res.status}`);
                 const game: ChessGame = await res.json();
                 handleSetChessGame(game);
 
@@ -175,11 +185,11 @@ function ChessBoardProvider({
                 console.error('Failed to fetch chess board:', err);
             }
         }
-        createNewGame();
-    }, [selectedGameOptions?.gameMode, user, handleSetChessGame, selectedGameOptions]);
+        loadOrCreateGame();
+    }, [gameId, selectedGameOptions?.gameMode, user, handleSetChessGame, selectedGameOptions]);
 
     // attack
-    const attack = useCallback(async (clickedPiece: ChessPiece) => {
+    const attack = useCallback(async (clickedPiece: ChessPiece, promotion: PromotionType | null = null) => {
         if (chessGame === null || selectedPiece === null || clickedPiece === null || isMoving) return;
 
         const previousGame = chessGame;
@@ -204,7 +214,7 @@ function ChessBoardProvider({
                     Move: `${selectedPiece?.position},${clickedPiece.position}`,
                     User: user?.username,
                     GameId: chessGame?.id,
-                    Promotion: null
+                    Promotion: promotion  
                 }),
             });
 

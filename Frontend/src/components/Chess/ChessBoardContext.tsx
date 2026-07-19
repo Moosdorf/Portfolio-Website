@@ -17,7 +17,7 @@ export type ChessBoardContextValue = {
     isViewingHistory: boolean;
     displayedBoard: ChessBoard | null;
     isMoving: boolean;
-    attack: (clickedPiece: ChessPiece) => void;
+    attack: (clickedPiece: ChessPiece, promotionType: number) => void;
     setActivePlayer: (activePlayer: string | null) => void;
     setPromotionInfo: (promotionInfo: PromotionInformation | null) => void;
     setSelectedPiece: (piece: ChessPiece | null) => void;

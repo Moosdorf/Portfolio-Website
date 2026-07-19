@@ -73,24 +73,33 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
 
     const handleOnClick = (clickedPiece: ChessPiece) => {
         
+        console.log(1)
+        console.log(isViewingHistory)
+        console.log(isMoving)
+        console.log(promotionInfo)
         if (isViewingHistory || isMoving || promotionInfo) return;
+        console.log(2)
         if (CheckForPromotion(clickedPiece)) return;
+        console.log(3)
 
         if (selectedPiece === null) {
             addSelected(clickedPiece);
             return;
         }
+        console.log(4)
 
         if (clickedPiece === selectedPiece) {
             removeSelected();
             return;
         }
 
+        console.log(5)
         // if the clicked piece belongs to the same side, reselect it instead of attacking
         if (clickedPiece.isWhite === selectedPiece.isWhite && clickedPiece.type !== PieceType.empty) {
             addSelected(clickedPiece);
             return;
         }
+        console.log(6)
         tryAttack(clickedPiece);
     };
 
@@ -130,16 +139,16 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
                     promotionType: promotionListSortedHighToLow[i]
                 });
             }
+
             setPromotionInfo({
                 from: selectedPiece,
                 to: clickedPiece,
-                promotion: PieceType.queen
+                options: promotionSquares  // now actually used
             });
             return true;
         }
         return false;
     }
-
 
     return (
         <div

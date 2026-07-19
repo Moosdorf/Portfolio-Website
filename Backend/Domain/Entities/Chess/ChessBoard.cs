@@ -206,29 +206,29 @@ public class ChessBoard
                     if (foundFriendly != null) break; // found another friendly in a row, not pinned
                     foundFriendly = reviewPiece;
                 }
-                if (reviewPiece.IsWhite != currentKing.IsWhite && foundFriendly != null) // friendly piece might be pinned. 
+                if (reviewPiece.IsWhite != currentKing.IsWhite && foundFriendly != null)
                 {
-                    (int fRow, int fCol) = ChessMethods.RankFileToRowCol(foundFriendly.Position); // find its position on the board in row col
-                    (int rRow, int rCol) = ChessMethods.RankFileToRowCol(reviewPiece.Position); // find its position on the board in row col
-                    // check if diagonal to piece
-                    if (Math.Abs(kingRow - rRow) == Math.Abs(kingCol - rCol))  // check if diagonal 
+                    (int fRow, int fCol) = ChessMethods.RankFileToRowCol(foundFriendly.Position);
+
+                    bool isDiagonalDirection = dRow != 0 && dCol != 0;
+
+                    if (isDiagonalDirection)
                     {
-                        if (reviewPiece.Type == PieceType.Bishop || reviewPiece.Type == PieceType.Queen) // only queen or bishop can make diagonal attacks in range
+                        if (reviewPiece.Type == PieceType.Bishop || reviewPiece.Type == PieceType.Queen)
                         {
                             foundFriendly.Pinned = true;
                             FindPinnedMovableSquares(fRow, fCol, dRow, dCol);
-                            break;
-
                         }
-                    } // if straight then its rook or queen
-                    if (reviewPiece.Type == PieceType.Rook || reviewPiece.Type == PieceType.Queen)
-                    {
-                        foundFriendly.Pinned = true;
-                        FindPinnedMovableSquares(fRow, fCol, dRow, dCol);
-                        break;
                     }
-
-
+                    else // straight direction
+                    {
+                        if (reviewPiece.Type == PieceType.Rook || reviewPiece.Type == PieceType.Queen)
+                        {
+                            foundFriendly.Pinned = true;
+                            FindPinnedMovableSquares(fRow, fCol, dRow, dCol);
+                        }
+                    }
+                    break; // either way, first enemy piece hit along this ray ends the scan
                 }
             }
         }

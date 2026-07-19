@@ -5,7 +5,7 @@
 .board-layout {
   display: flex;
   align-items: stretch;
-  justify-content: center;   
+  justify-content: center;
   gap: 1.5rem;
   width: 100%;
 }
@@ -13,17 +13,18 @@
 .info-panel,
 .fake-info-panel {
   flex: 1 1 auto;
-  max-width: 280px;          
+  max-width: 280px;
   min-width: 100px;
   box-sizing: border-box;
 }
 
 .info-panel {
-  background: #1e1e1e;
-  color: white;
+  background: var(--panel-bg);
+  color: var(--panel-text);
   padding: 1rem;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--panel-border);
 }
 
 .wrapper {
@@ -38,11 +39,11 @@
 /* ============================== */
 
 .selection-panel {
-  background: #1e1e1e;
-  color: white;
+  background: var(--panel-bg);
+  color: var(--panel-text);
   padding: 2rem;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--panel-border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -53,7 +54,7 @@
 
 .selection-panel h3,
 .selection-panel h4 {
-  color: white;
+  color: var(--panel-text);
   font-weight: 600;
 }
 
@@ -92,7 +93,7 @@
   font-family: 'Courier New', monospace;
   font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--panel-text-muted);
 }
 
 .corner-spacer {
@@ -114,7 +115,7 @@
   font-family: 'Courier New', monospace;
   font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--panel-text-muted);
 }
 
 @media (max-width: 768px) {
@@ -146,15 +147,15 @@
   height: 210px;
   overflow-y: auto;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.25);
-  box-shadow: inset 0 0 0 1px rgba(226, 179, 58, 0.15);
+  background: var(--panel-inset);
+  box-shadow: inset 0 0 0 1px var(--board-gold-border);
   scrollbar-width: thin;
-  scrollbar-color: rgba(226, 179, 58, 0.4) transparent;
+  scrollbar-color: var(--board-gold-border) transparent;
 }
 
 .move-history::-webkit-scrollbar { width: 6px; }
 .move-history::-webkit-scrollbar-thumb {
-  background: rgba(226, 179, 58, 0.4);
+  background: var(--board-gold-border);
   border-radius: 3px;
 }
 
@@ -164,33 +165,33 @@
   padding: 6px 10px;
   font-family: 'Courier New', monospace;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--panel-text);
 }
 
 .history-row.header {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--panel-text-muted);
   font-family: inherit;
 }
 
 .history-row:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--panel-hover);
 }
 
 .history-row:hover {
-  background-color: rgba(226, 179, 58, 0.12);
+  background-color: var(--board-gold-soft);
   cursor: pointer;
 }
 
 .history-row.current {
-  background-color: rgba(226, 179, 58, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(226, 179, 58, 0.45);
+  background-color: var(--board-gold-soft);
+  box-shadow: inset 0 0 0 1px var(--board-gold-border);
 }
 
 .move-number {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--panel-text-muted);
 }
 
 /* ============================== */
@@ -248,9 +249,9 @@
 
 /* ============================== */
 /* Board                           */
+/* (game-state colors — left as-is */
+/*  intentionally, see note below) */
 /* ============================== */
-
-
 
 .chessboard {
   position: relative;
@@ -300,7 +301,7 @@
   position: absolute;
   inset: 0;
   border: 1px solid rgba(101, 81, 28, 0.1);
-  pointer-events: none;  
+  pointer-events: none;
 }
 
 /* ============================== */
@@ -361,15 +362,18 @@
   box-shadow: 0 0 8px rgba(255, 60, 60, 0.3);
 }
 
-/* puzzle */
+/* ============================== */
+/* Puzzle                          */
+/* ============================== */
+
 .status-solved {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
 }
 
 .status-revealed {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.6);
+  background: var(--panel-hover);
+  color: var(--panel-text-muted);
 }
 
 .status-slot {
@@ -381,41 +385,38 @@
   gap: 0.5rem;
 }
 
-
-
 .puzzle-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
 }
 
 .puzzle-info-heading {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .puzzle-id {
-    color: #888;
-    font-size: 0.85rem;
-    font-family: monospace;
+  color: var(--panel-text-muted);
+  font-size: 0.85rem;
+  font-family: monospace;
 }
 
 .tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 0.6rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.6rem 0;
 }
-
 
 .status-line {
   margin: 0;
 }
 
 .tag-pill {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--panel-hover);
+  color: var(--panel-text-muted);
+  border: 1px solid var(--panel-border);
   font-size: 0.72rem;
   font-weight: 500;
   padding: 0.15rem 0.55rem;
@@ -430,19 +431,19 @@
   margin: auto 0 0.75rem;
 }
 
-
-
 .puzzle-stats {
   display: flex;
   gap: 1rem;
   margin-top: 0;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--panel-text-muted);
 }
 
 /* ============================== */
 /* Square States                   */
+/* (game-state colors — left as-is)*/
 /* ============================== */
+
 .piece-cell {
   position: absolute;
   inset: 0;
@@ -452,58 +453,91 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(226, 179, 58, 0.25);
-  border: 2px solid rgba(226, 179, 58, 0.7);
-  box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
+  background: var(--board-gold-soft);
+  border: 2px solid var(--board-gold-border);
+  box-shadow: inset 0 0 8px var(--board-gold-soft);
   z-index: 1;
 }
 
-
-
-.movedTo {
-  background: radial-gradient(
-    circle farthest-corner,
-    transparent 35%,
-    rgba(221, 185, 93, 0.45) 100%
-  ) !important;
-  border: 2px solid rgba(226, 179, 58, 0.7);
-  box-shadow: inset 0 0 8px #e2b33a4d;
-  z-index: 3;
-}
-
-.movedFrom {
-  background: radial-gradient(
-    circle farthest-corner,
-    transparent 35%,
-    rgba(221, 185, 93, 0.45) 100%
-  ) !important;
+.square.light.movedTo,
+.square.light.movedFrom {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 35%,
+      rgba(221, 185, 93, 0.45) 100%
+    ),
+    #f0d9b5 !important;
   border: 2px solid rgba(226, 179, 58, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
 }
 
-.check {
-  background: radial-gradient(
-    circle farthest-corner,
-    transparent 35%,
-    rgba(255, 168, 7, 0.85) 100%
-  ) !important;
+.square.dark.movedTo,
+.square.dark.movedFrom {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 35%,
+      rgba(221, 185, 93, 0.45) 100%
+    ),
+    #b58863 !important;
+  border: 2px solid rgba(226, 179, 58, 0.7);
+  box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
+  z-index: 3;
+}
+
+.square.light.check {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 35%,
+      rgba(255, 168, 7, 0.85) 100%
+    ),
+    #f0d9b5 !important;
   border: 2px solid rgba(255, 115, 0, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
 }
 
-.checkmate {
-  background: radial-gradient(
-    circle farthest-corner,
-    transparent 30%,
-    rgba(212, 8, 8, 0.75) 100%
-  ) !important;
+.square.dark.check {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 35%,
+      rgba(255, 168, 7, 0.85) 100%
+    ),
+    #b58863 !important;
+  border: 2px solid rgba(255, 115, 0, 0.7);
+  box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
+  z-index: 3;
+}
+
+.square.light.checkmate {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 30%,
+      rgba(212, 8, 8, 0.75) 100%
+    ),
+    #f0d9b5 !important;
   border: 2px solid rgba(255, 0, 0, 0.7);
   box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
   z-index: 3;
 }
 
+.square.dark.checkmate {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 30%,
+      rgba(212, 8, 8, 0.75) 100%
+    ),
+    #b58863 !important;
+  border: 2px solid rgba(255, 0, 0, 0.7);
+  box-shadow: inset 0 0 8px rgba(226, 179, 58, 0.3);
+  z-index: 3;
+}
 
 .status-check {
   background: rgba(226, 179, 58, 0.15);
@@ -517,7 +551,7 @@
 
 .game-id {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--panel-text-muted);
   margin-top: 0.75rem;
 }
 
@@ -534,17 +568,18 @@
 
 .player-bar {
   padding: 0.5rem 0.9rem;
-  background: #1e1e1e;
+  background: var(--panel-bg);
   border-radius: 8px;
-  border: 1px solid rgb(255, 255, 255);
+  border: 1px solid var(--panel-border);
 }
 
 .player-bar.active {
-  background: #aca036;
+  background: var(--board-gold-soft);
+  border-color: var(--board-gold-border);
 }
 
 .player-name {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--panel-text-muted);
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
   overflow: hidden;
@@ -553,7 +588,7 @@
 }
 
 .player-bar.active .player-name {
-  color: white;
+  color: var(--panel-text);
 }
 
 /* ============================== */
