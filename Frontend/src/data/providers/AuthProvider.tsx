@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import { API_URL } from '../../config';
 
 type AuthContextType = {
     user: any;
@@ -37,7 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = async (username: string, password: string) => {
         setFetchingData(true);
         try {
-            const response = await fetch(`https://localhost:5270/api/auth/login`, {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
                 credentials: 'include',
                 headers: { "Content-Type": "application/json" },
@@ -65,7 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setPasswordWeak(false);
         
         try {
-            const response = await fetch(`https://localhost:5270/api/auth/new`, {
+            const response = await fetch(`${API_URL}/api/auth/new`, {
                 method: "POST",
                 credentials: 'include',
                 headers: { "Content-Type": "application/json" },

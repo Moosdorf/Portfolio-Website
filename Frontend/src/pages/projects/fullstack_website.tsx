@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_URL } from "../../config";
 
 export type WebsiteProject = {
     description: string;
@@ -21,7 +22,7 @@ function WebsiteProject() {
     const [websiteProject, setProject] = useState<WebsiteProject>();
 
     useEffect(() => {
-        fetch(`https://localhost:5270/api/Projects/0`, {
+        fetch(`${API_URL}/api/Projects/0`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         })

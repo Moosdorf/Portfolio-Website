@@ -11,6 +11,9 @@ import { ChessBoardContext, type ChessBoardContextValue } from '../../components
 import { useAuth } from './AuthProvider';
 import * as signalR from '@microsoft/signalr';
 import { useHistoryNavigation } from '../../hooks/chess/useHistoryNavigation';
+import { API_URL } from '../../config';
+import { api } from '../../api/client';
+
 
 type ChessBoardProviderProps = {
     children: ReactNode;
@@ -113,7 +116,7 @@ function ChessBoardProvider({
     // signal r
     useEffect(() => {
         const conn = new signalR.HubConnectionBuilder()
-            .withUrl('https://localhost:5270/hubs/chess', { withCredentials: true })
+            .withUrl(`${API_URL}/hubs/chess`, { withCredentials: true })
             .withAutomaticReconnect()
             .build();
 
@@ -127,7 +130,7 @@ function ChessBoardProvider({
         return () => {
             conn.stop();
         };
-    }, [handleSetChessGame]); // connection lifecycle only — set up once
+    }, [handleSetChessGame]); // connection lifecycle only which is set up once
 
     useEffect(() => {
         if (!connection || connection.state !== signalR.HubConnectionState.Connected || !chessGame?.id) return;
@@ -144,64 +147,49 @@ function ChessBoardProvider({
             try {
                 if (!user) return;
 
-
                 if (gameId) {
-                    // load existing game
-                    const res = await fetch(`https://localhost:5270/api/chess/${gameId}`, {
-                        method: 'GET',
+                    const game = await api.get<ChessGame>(`/api/chess/${gameId}`, {
                         credentials: 'include',
-                        headers: { 'Content-Type': 'application/json' },
                     });
-                    if (!res.ok) throw new Error(`Failed to load game: ${res.status}`);
-                    const game: ChessGame = await res.json();
                     handleSetChessGame(game);
                     return;
                 }
 
-                let path = selectedGameOptions.gameMode == "Puzzle" ? `https://localhost:5270/api/Chess/puzzle` :
-                    selectedGameOptions.gameMode == "Freeplay" ?      `https://localhost:5270/api/Chess/freeplay` :
-                    selectedGameOptions.gameMode == "Multiplayer" ?   `https://localhost:5270/api/Chess/multiplayer` :
-                                                            `https://localhost:5270/api/Chess/bot`; // bot
+                let path = selectedGameOptions.gameMode == "Puzzle" ? `/api/Chess/puzzle` :
+                    selectedGameOptions.gameMode == "Freeplay" ?      `/api/Chess/freeplay` :
+                    selectedGameOptions.gameMode == "Multiplayer" ?   `/api/Chess/multiplayer` :
+                                                            `/api/Chess/bot`; // bot
 
-                // no id — create new game (existing logic)
-                let body = JSON.stringify({});
+                let body: Record<string, unknown> = {};
                 switch (selectedGameOptions?.gameMode) {
-                    case ChessGameMode.puzzle: 
+                    case ChessGameMode.puzzle:
                     case ChessGameMode.bot: {
                         if (selectedGameOptions?.selectedColor === "white") {
-                            body = JSON.stringify({
+                            body = {
                                 GameMode: selectedGameOptions?.gameMode,
                                 BlackId: -1,
                                 WhiteId: user.id
-                            });
+                            };
                         } else {
-                            body = JSON.stringify({
+                            body = {
                                 GameMode: selectedGameOptions?.gameMode,
                                 WhiteId: -1,
                                 BlackId: user.id
-                            });
+                            };
                         }
                         break;
                     }
 
                     case ChessGameMode.freeplay: {
-                        body = JSON.stringify({
+                        body = {
                             GameMode: selectedGameOptions?.gameMode,
                             WhiteId: user.id,
                             BlackId: user.id
-                        });
+                        };
                     }
                 }
 
-
-                const res = await fetch(path, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body,
-                });
-                if (!res.ok) throw new Error(`Failed to load board: ${res.status}`);
-                const game: ChessGame = await res.json();
+                const game = await api.post<ChessGame>(path, body, { credentials: 'include' });
                 handleSetChessGame(game);
 
             } catch (err) {
@@ -217,6 +205,7 @@ function ChessBoardProvider({
 
         if (promotion)
             console.log("promotion")
+        
         const previousGame = chessGame;
         const optimisticGame = buildOptimisticGame(chessGame, selectedPiece, clickedPiece);
 
@@ -224,29 +213,17 @@ function ChessBoardProvider({
         setChessGame(optimisticGame);
         setSelectedPiece(null);
 
-        let path = chessGame.gameType == "Puzzle" ? `https://localhost:5270/api/Chess/${chessGame?.id}/move` :
-                    chessGame.gameType == "Freeplay" ? `https://localhost:5270/api/Chess/${chessGame?.id}/move` :
-                    chessGame.gameType == "Multiplayer" ? `https://localhost:5270/api/Chess/${chessGame?.id}/move` :
-                                                    `https://localhost:5270/api/Chess/bot/${chessGame?.id}/move`; // bot
+        let path = chessGame.gameType == "Puzzle" ? `/api/Chess/${chessGame?.id}/move` :
+                    chessGame.gameType == "Freeplay" ? `/api/Chess/${chessGame?.id}/move` :
+                    chessGame.gameType == "Multiplayer" ? `/api/Chess/${chessGame?.id}/move` :
+                                                    `/api/Chess/bot/${chessGame?.id}/move`; // bot
         try {
-            const res = await fetch(path, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    Move: `${selectedPiece?.position},${clickedPiece.position}${(promotion == 5) ? "q" : (promotion == 4) ? "r" : (promotion == 3) ? "b" : (promotion == 2) ? "n" : ""}` ,
-                    User: user?.username,
-                    GameId: chessGame?.id
-                }),
-            });
+            const game = await api.put<ChessGame>(path, {
+                Move: `${selectedPiece?.position},${clickedPiece.position}${(promotion == 5) ? "q" : (promotion == 4) ? "r" : (promotion == 3) ? "b" : (promotion == 2) ? "n" : ""}`,
+                User: user?.username,
+                GameId: chessGame?.id
+            }, { credentials: 'include' });
 
-            if (!res.ok) {
-                throw new Error(`Failed to load board: ${res.status}`);
-            }
-
-            const game: ChessGame = await res.json();
             handleSetChessGame(game);
         } catch (err) {
             console.error('Move failed, rolling back:', err);

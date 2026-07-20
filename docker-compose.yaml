@@ -9,7 +9,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   backend:
-    build: ./Backend/Portfolio-BE
+    build: ./Backend
     ports:
       - "5000:8080"
     env_file: .env

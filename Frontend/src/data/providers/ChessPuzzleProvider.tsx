@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { ChessBoardContext, type ChessBoardContextValue } from '../../components/Chess/ChessBoardContext';
-import { ChessGameMode, type ChessGame, type ChessPiece, type ChessPuzzle, type PromotionInformation } from '../../components/Chess/ChessTypes';
+import { ChessGameMode, type ChessGame, type ChessPiece, type ChessPuzzle, type PromotionInformation, type PromotionSquare } from '../../components/Chess/ChessTypes';
 import { useAuth } from '../../data/providers/AuthProvider';
 import { ChessPuzzleContext } from '../../components/Chess/ChessPuzzleContext';
 import { useHistoryNavigation } from '../../hooks/chess/useHistoryNavigation';
+import { api } from '../../api/client';
 
 
 type ChessPuzzleProviderProps = {
@@ -44,13 +45,11 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     const fetchNewPuzzle = useCallback(async () => {
         setIsFetching(true);
         try {
-            const res = await fetch(`https://localhost:5270/api/puzzle/random`, {
-                method: 'GET',
-                credentials: 'include'
-             });
-            if (!res.ok) throw new Error(`Failed to load board: ${res.status}`);
 
-            const puzzle: ChessPuzzle = await res.json();
+            let puzzle = await api.get<ChessPuzzle>('/api/puzzle/random', {
+                credentials: 'include',
+            });
+
             setChessPuzzle(puzzle);
             setIsRevealed(false);
             setHint(null);
@@ -90,14 +89,14 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         }
     }, [user, snapToLive]);
 
-    const attack = useCallback(async (clickedPiece: ChessPiece) => {
+    const attack = useCallback(async (clickedPiece: ChessPiece, promotionType: number | null = null) => {
 
         if (isSolved || isViewingHistory || !currentChessGame || !chessPuzzle || !selectedPiece || isMoving) {
             setSelectedPiece(null);
             return;
         }
 
-        const attempted = `${selectedPiece.position},${clickedPiece.position}`;
+        const attempted = `${selectedPiece?.position},${clickedPiece.position}${(promotionType == 5) ? "q" : (promotionType == 4) ? "r" : (promotionType == 3) ? "b" : (promotionType == 2) ? "n" : ""}`;
         const expected = chessPuzzle.moves[moveIndex];
 
         if (attempted !== expected) {
@@ -159,7 +158,15 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         [chessPuzzle, moveIndex, isRevealed]
     );
 
+    const choosePromotion = (promoSquare: PromotionSquare) => {
+        if (!promotionInfo) return;
+        attack(promotionInfo.to, promoSquare.promotionType);
+        setPromotionInfo(null);
+        setSelectedPiece(null);
+    };
+
     const value = useMemo<ChessBoardContextValue>(() => ({
+        choosePromotion,
         chessGame: currentChessGame ?? null,
         selectedPiece,
         setSelectedPiece,

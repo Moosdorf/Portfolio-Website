@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CardData } from "../data/CardData";
 import Card from "./Card"
+import { API_URL } from "../config";
 
 
 
@@ -9,7 +10,7 @@ function ProjectContainer() {
     const [fetching, setFetching] = useState(true);
 
     useEffect(() => {
-        fetch(`https://localhost:5270/api/projects`, {
+        fetch(`${API_URL}/api/projects`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             }).then(data => {

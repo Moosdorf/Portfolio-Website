@@ -8,7 +8,9 @@ public class StockFishService : IStockFishService
     private readonly Process _engine;
     public StockFishService()
     {
-        var stockfishPath = Path.GetFullPath("Stockfish/stockfish.exe");
+        var OS = GetPlatformFolder();
+        
+        var stockfishPath = Path.GetFullPath("Stockfish/windows/stockfish.exe");
         Console.WriteLine(stockfishPath);
         _engine = new Process
         {
@@ -25,6 +27,14 @@ public class StockFishService : IStockFishService
         SendCommand("uci");
         Console.WriteLine(WaitForResponse("uciok"));
     }
+
+    private static string GetPlatformFolder()
+    {
+        if (OperatingSystem.IsWindows()) return "Stockfish/windows/stockfish.exe";
+        if (OperatingSystem.IsLinux()) return "Stockfish/windows/stockfish-ubuntu-x86-64-avx2";
+        throw new PlatformNotSupportedException("Unsupported OS for Stockfish");
+    }
+
     public MoveModel MoveFrom(string FEN)
     {
         Console.WriteLine("position fen " + FEN);
@@ -38,10 +48,9 @@ public class StockFishService : IStockFishService
         if (response.Length == 5)
         {
             promotion = response[4];
-            response = response[..4];
         }
-        if (response.Length == 4) response = response.Insert(2, ","); 
-
+        response = response.Insert(2, ",");
+        Console.WriteLine(response);
         return new MoveModel { Move = response, Promotion = promotion };
     }
 

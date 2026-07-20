@@ -3,6 +3,8 @@ import { Button } from "../../../components/Button";
 import { type Project } from "../../../components/Chess/ChessTypes";
 import { Link } from "react-router-dom";
 import SelectionPanel from "../../../components/SelectionPanel";
+import { API_URL } from "../../../config";
+
 
 const SECTIONS = [
     { id: "overview", label: "Overview" },
@@ -17,7 +19,7 @@ function ChessProject() {
     const [chessProject, setProject] = useState<Project>();
 
     useEffect(() => {
-        fetch(`https://localhost:5270/api/Projects/1`, {
+        fetch(`${API_URL}/api/Projects/1`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         })
