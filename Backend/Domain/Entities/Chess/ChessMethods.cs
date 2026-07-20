@@ -1,5 +1,6 @@
 ﻿using Backend.Application.Chess.DTO;
 using Backend.Domain.Entities.Chess;
+using System.Transactions;
 
 
 namespace HelperMethods;
@@ -24,11 +25,11 @@ public static class ChessMethods
     /// Converts a chessboard coordinate in file-rank format (e.g., "e4") to row and column indexes.
     /// </summary>
     /// <returns>A tuple with the corresponding row and col: (row, col).</returns>
-    public static (int,int) RankFileToRowCol(string fileRank) // "e3" to 4,2
+    public static (int, int) RankFileToRowCol(string fileRank) // "e3" to 4,2
     {
         int row = fileRank[1] - 48 - 1; // '1' - 48 = 1. then to get index instead -1 again
 
-        int col =  fileRank[0] - 97; // same as the other file conversion in RowCol, just reversed
+        int col = fileRank[0] - 97; // same as the other file conversion in RowCol, just reversed
 
         return (row, col);
     }
@@ -41,18 +42,18 @@ public static class ChessMethods
     {
         var blockers = new List<string>() { pieceChecked.Position };
         switch (pieceChecked.Type)
-            {
-                case PieceType.Queen:
-                    blockers = blockers.Concat(DiagonalBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
-                    blockers = blockers.Concat(StraightBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
+        {
+            case PieceType.Queen:
+                blockers = blockers.Concat(DiagonalBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
+                blockers = blockers.Concat(StraightBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
                 break;
 
-                case PieceType.Rook:
-                    blockers = blockers.Concat(StraightBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
+            case PieceType.Rook:
+                blockers = blockers.Concat(StraightBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
                 break;
 
-                case PieceType.Bishop:
-                    blockers = blockers.Concat(DiagonalBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
+            case PieceType.Bishop:
+                blockers = blockers.Concat(DiagonalBlocks(chessState.GameBoard, king, pieceChecked)).ToList();
                 break;
         }
 
@@ -131,8 +132,14 @@ public static class ChessMethods
     /// <summary>
     /// Converts a move string in the format "e2,e4" into row and column indices for from and to squares.
     /// </summary>
-    public static (int fromRow, int fromCol, int toRow, int toCol) ConvertMoveToColRow(string move)
+    public static (int fromRow, int fromCol, int toRow, int toCol, char? promotion) ConvertMoveToColRow(string move)
     {
+        char? promotion = null;
+        if (move.Length == 6)
+        {
+            promotion = move[move.Length - 1];
+            move.Remove(move.Length - 1);
+        }
         // move can be e2,e4. (from,to)
         var fromTo = move.Split(','); // split into [from, to]
 
@@ -142,7 +149,7 @@ public static class ChessMethods
         (int tRow, int tCol) = RankFileToRowCol(to); // convert to row,col to use as indexes
         (int fRow, int fCol) = RankFileToRowCol(from);
 
-        return (fRow, fCol, tRow, tCol); // return all of the indexes
+        return (fRow, fCol, tRow, tCol, promotion); // return all of the indexes
     }
 
     /// <summary>
@@ -152,43 +159,41 @@ public static class ChessMethods
     public static void MakeMove(ChessBoard chessState, MoveModel move)
     {
 
-        var (fRow, fCol, tRow, tCol) = ConvertMoveToColRow(move.Move); // find indexes from the move
+        var (fRow, fCol, tRow, tCol, promotion) = ConvertMoveToColRow(move.Move); // find indexes from the move
 
         // find target and attacker
         var target = chessState.GameBoard[tRow][tCol];
         var attacker = chessState.GameBoard[fRow][fCol];
 
-
-        if (move.Promotion != null)
+        // remove any captured piece from its side's piece list — applies whether promoting or not,
+        // since a promotion can also be a capture (e.g. a diagonal pawn capture onto the back rank)
+        if (target.Type != PieceType.Empty)
         {
-            Piece promotionPiece = null;
-            switch(move.Promotion)
-            {
-                
-                case 'q': 
-                    promotionPiece = new Queen(attacker.IsWhite) { Type = PieceType.Queen };
-                    break;
-                case 'r':
-                    promotionPiece = new Rook(attacker.IsWhite) { Type = PieceType.Rook };
-                    break;
-                case 'b':
-                    promotionPiece = new Bishop(attacker.IsWhite) { Type = PieceType.Bishop };
-                    break;
-                case 'n':
-                    promotionPiece = new Knight(attacker.IsWhite) { Type = PieceType.Knight };
-                    break;
+            var capturedList = attacker.IsWhite ? chessState.BlackPieces : chessState.WhitePieces;
+            capturedList.Remove(target);
+        }
 
-            }
+        if (promotion != null)
+        {
+            Console.WriteLine("go promote");
+            Console.WriteLine(promotion);
+            Piece promotionPiece = promotion switch
+            {
+                'q' => new Queen(attacker.IsWhite) { Type = PieceType.Queen, Position = ChessMethods.RowColToRankFile(tRow, tCol) },
+                'r' => new Rook(attacker.IsWhite) { Type = PieceType.Rook, Position = ChessMethods.RowColToRankFile(tRow, tCol) },
+                'b' => new Bishop(attacker.IsWhite) { Type = PieceType.Bishop, Position = ChessMethods.RowColToRankFile(tRow, tCol) },
+                'n' => new Knight(attacker.IsWhite) { Type = PieceType.Knight, Position = ChessMethods.RowColToRankFile(tRow, tCol) },
+                _ => throw new ArgumentException($"Invalid promotion piece '{move.Promotion}'")
+            };
+
             chessState.GameBoard[tRow][tCol] = promotionPiece;
-            var pieceList = (attacker.IsWhite) ? chessState.WhitePieces : chessState.BlackPieces;
+            var pieceList = attacker.IsWhite ? chessState.WhitePieces : chessState.BlackPieces;
             pieceList.Remove(attacker);
             pieceList.Add(promotionPiece);
         }
         else
         {
             // put attacker on target and update the position
-            var pieceList = (!attacker.IsWhite) ? chessState.WhitePieces : chessState.BlackPieces;
-            if (pieceList.Contains(target)) pieceList.Remove(target); // if empty this does not happen
             chessState.GameBoard[tRow][tCol] = attacker;
         }
 
@@ -198,8 +203,12 @@ public static class ChessMethods
         if (attacker.Type == PieceType.Pawn && target.Position == chessState.EnPassantSquare)
         {
             var rowRemove = (attacker.IsWhite) ? tRow - 1 : tRow + 1;
-            chessState.GameBoard[rowRemove][tCol] = new Empty(false) { Type = PieceType.Empty, Position = RowColToRankFile(rowRemove, tCol) };
+            var capturedPawn = chessState.GameBoard[rowRemove][tCol];
 
+            var capturedList = attacker.IsWhite ? chessState.BlackPieces : chessState.WhitePieces;
+            capturedList.Remove(capturedPawn);
+
+            chessState.GameBoard[rowRemove][tCol] = new Empty(false) { Type = PieceType.Empty, Position = RowColToRankFile(rowRemove, tCol) };
         }
 
         if (attacker.Type == PieceType.King && Math.Abs(fCol - tCol) == 2)
@@ -285,7 +294,7 @@ public static class ChessMethods
                 if (piece.Type == PieceType.Empty) // if empty continue and increment counter
                 {
                     counter++;
-                    continue; 
+                    continue;
                 }
                 if (counter > 0) // if not empty and counter is above 0, add the count to the string
                 {

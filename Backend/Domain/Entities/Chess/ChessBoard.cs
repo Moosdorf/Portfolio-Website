@@ -97,7 +97,7 @@ public class ChessBoard
     }
     public bool ValidateMove(string move)
     {
-        var (fRow, fCol, tRow, tCol) = ChessMethods.ConvertMoveToColRow(move);
+        var (fRow, fCol, tRow, tCol, promotion) = ChessMethods.ConvertMoveToColRow(move);
         // find attacker and target from the GameBoard
         var attacker = GameBoard[fRow][fCol];
         var target = GameBoard[tRow][tCol];

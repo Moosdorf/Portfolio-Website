@@ -51,8 +51,8 @@ function WebsiteProject() {
                             <h2 className="text-lg font-semibold mb-3 border-b border-gray-300 pb-2">
                                 {section.label}
                             </h2>
-                            <p className="text-sm text-gray-600">
-                                {/* content goes here */}
+                            <p className="text-sm text-gray-400">
+                                123
                             </p>
                         </section>
                     ))}

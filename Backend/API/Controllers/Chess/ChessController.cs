@@ -57,7 +57,7 @@ public class ChessController : HomeController
 
     // create bot game
     [HttpPost]
-    [Route("new")]
+    [Route("bot")]
     public Task<IActionResult> CreateBotGame([FromBody] CreateChessModel model)
         => CreateGame(model, "Bot");
 
@@ -75,11 +75,13 @@ public class ChessController : HomeController
 
     private async Task<IActionResult> CreateGame(CreateChessModel model, string expectedGameMode)
     {
+        Console.WriteLine("hello creating game");
         if (model == null)
         {
             Console.WriteLine("no model");
             return NotFound();
         }
+
         if (model.GameMode != expectedGameMode) return BadRequest("Wrong gamemode");
 
         var (game, chessState) = await chessDataService.CreateGameAsync(model);

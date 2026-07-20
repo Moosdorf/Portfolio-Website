@@ -6,9 +6,10 @@ import Navbar from './components/Navbar.tsx';
 import Account from './pages/account.tsx';
 import ChessProject from './pages/projects/chess/ChessProject.tsx';
 import WebsiteProject from './pages/projects/fullstack_website.tsx';
-import ChessBotGame from './pages/projects/chess/chessBotGame.tsx';
-import ChessFreeplay from './pages/projects/chess/chessFreeplay.tsx';
-import ChessPuzzle from './pages/projects/chess/chessPuzzle.tsx';
+import ChessBotGame from './pages/projects/chess/ChessBotGame.tsx';
+import ChessFreeplay from './pages/projects/chess/ChessFreeplay.tsx';
+import ChessPuzzle from './pages/projects/chess/ChessPuzzle.tsx';
+
 
 
 function App() {

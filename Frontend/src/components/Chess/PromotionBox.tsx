@@ -1,4 +1,3 @@
-// components/Chess/PromotionPicker.tsx
 import { useChessBoard } from './ChessBoardContext';
 import type { PromotionType } from './ChessTypes';
 
@@ -8,8 +7,8 @@ function PromotionBox() {
     if (!promotionInfo) return null;
 
     const handlePick = (promotionType: PromotionType) => {
-        attack(promotionInfo.to, promotionType); // see step 4 — attack needs this param
-        setPromotionInfo(null); // clears the lock, board becomes interactive again
+        attack(promotionInfo.to, promotionType); 
+        setPromotionInfo(null); 
     };
 
     const isWhite = promotionInfo.from.isWhite;
@@ -24,7 +23,7 @@ function PromotionBox() {
                         onClick={() => handlePick(option.promotionType)}
                     >
                         <img
-                            alt={option.promotionType}
+                            alt={"option.promotionType"}
                             src={`/chess_images/${isWhite ? "white" : "black"}-${option.promotionType}.png`}
                         />
                     </button>

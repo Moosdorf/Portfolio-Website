@@ -29,7 +29,7 @@ function ChessBotGame() {
                             setStarted(true);
                         }} > White
                         <span className="absolute bottom-0 left-0 w-full h-1.5"
-                            style={{ backgroundColor: "white", border: "1px solid #ccc" }}
+                            style={{ backgroundColor: "white", border: "1px solid #888686" }}
                         />
                     </Button>
 
@@ -40,7 +40,7 @@ function ChessBotGame() {
                             }} > 
                         Black
                         <span className="absolute bottom-0 left-0 w-full h-1.5"
-                            style={{ backgroundColor: "black", border: "1px solid #292929" }}
+                            style={{ backgroundColor: "black", border: "1px solid #888686" }}
                         />
                     </Button>
 
@@ -52,6 +52,7 @@ function ChessBotGame() {
                     > Random
                         <span className="absolute bottom-0 left-0 w-full h-1.5"
                             style={{
+                                backgroundColor: "white", border: "1px solid #ccc",
                                 backgroundImage: "linear-gradient(90deg, white 50%, black 50%)"
                             }}
                         />

@@ -4,10 +4,10 @@ import { PieceType, type ChessPiece } from './ChessTypes';
 import PieceDisplay from './PieceDisplay';
 import { useChessBoard } from './ChessBoardContext';
 import ChessBoardGrid from './ChessBoardGrid';
+import { useEffect, useRef, useState } from 'react';
+import MoveHistory from './MoveHistory';
 import InfoPanel from './InfoPanel';
 import { Button } from '../Button';
-import { useEffect, useRef } from 'react';
-import MoveHistory from './MoveHistory';
 
 // props for component
 
@@ -15,6 +15,8 @@ function  ChessBoardDisplay() {
     const { user } = useAuth();
     const { chessGame, chessHistory, viewIndex, isViewingHistory, goToPrevious, goToNext, goToCurrent, setViewIndex } = useChessBoard();
     const currentRowRef = useRef<HTMLDivElement>(null);
+
+    const [askForDrawSafety, setAskForDrawSafety] = useState(false);
 
     const currentIndex = viewIndex === null ? chessHistory.length - 1 : viewIndex;
 
@@ -64,7 +66,7 @@ function  ChessBoardDisplay() {
                     <h5>Game mode: {chessGame.gameType}</h5>
                     <h5>Move: {chessGame.chessBoard.fullMoveClock}</h5>
                     {chessGame.chessBoard.lastMove && <h5>Last move: {chessGame.chessBoard.lastMove}</h5>}
-                    <p className="game-id">Game ID: {chessGame.id}</p>
+                    {chessGame.gameType == "bot" && <p className="game-id">Game ID: {chessGame.id}</p>}
 
                     <MoveHistory
                         chessHistory={chessHistory}
@@ -75,6 +77,22 @@ function  ChessBoardDisplay() {
                         goToNext={goToNext}
                         goToCurrent={goToCurrent}
                     />
+
+                    {chessGame.gameType == "bot" && !askForDrawSafety && 
+                    <div className="history-nav">
+                        <Button variant='secondary'>Forfeit</Button>
+                        <Button variant='secondary' onClick={() => setAskForDrawSafety(true)}>Draw</Button> {/* ---> are you sure you want to ask for draw...  */}
+                    </div>}
+                    {chessGame.gameType == "bot" && askForDrawSafety && 
+                    <div className="history-nav">
+                        <p>Do you really wish to forfeit?</p>
+                        <Button variant='secondary' onClick={() => {
+                            setAskForDrawSafety(false)
+                            console.log("user sending a draw")
+                        }}>Yes</Button>
+                        <Button variant='secondary' onClick={() => setAskForDrawSafety(false)}>No</Button>
+                    </div>}
+
 
                 </InfoPanel>
             </div>

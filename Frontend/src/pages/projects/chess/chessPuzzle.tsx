@@ -5,10 +5,10 @@ import ChessBoardGrid from "../../../components/Chess/ChessBoardGrid";
 import ChessPuzzleProvider from "../../../data/providers/ChessPuzzleProvider";
 import { useChessPuzzle } from "../../../components/Chess/ChessPuzzleContext";
 import { useChessBoard } from "../../../components/Chess/ChessBoardContext";
-import InfoPanel from "../../../components/Chess/InfoPanel";
 import MoveHistory from "../../../components/Chess/MoveHistory";
 import SelectionPanel from "../../../components/SelectionPanel";
 import { Link } from "react-router-dom";
+import InfoPanel from "../../../components/Chess/InfoPanel";
 
 function ChessPuzzle() {
     return (

@@ -5,7 +5,7 @@ import {
     useState,
     type ReactNode,
 } from 'react';
-import type { ChessBoard, ChessGame, ChessPiece, PromotionInformation, PromotionType, SelectedGameOptions } from '../../components/Chess/ChessTypes';
+import { ChessGameMode, type ChessBoard, type ChessGame, type ChessPiece, type PromotionInformation, type PromotionSquare, type PromotionType, type SelectedGameOptions } from '../../components/Chess/ChessTypes';
 import { PieceType } from '../../components/Chess/ChessTypes';
 import { ChessBoardContext, type ChessBoardContextValue } from '../../components/Chess/ChessBoardContext';
 import { useAuth } from './AuthProvider';
@@ -96,6 +96,8 @@ function ChessBoardProvider({
     const handleSetChessGame = useCallback((game: ChessGame) => {
         if (game === null) return;
 
+        console.log("game")
+        console.log(game)
         if (game?.chessBoard.turn === "w") {
             setActivePlayer(game.players[0]);
         } else {
@@ -142,6 +144,7 @@ function ChessBoardProvider({
             try {
                 if (!user) return;
 
+
                 if (gameId) {
                     // load existing game
                     const res = await fetch(`https://localhost:5270/api/chess/${gameId}`, {
@@ -155,23 +158,43 @@ function ChessBoardProvider({
                     return;
                 }
 
+                let path = selectedGameOptions.gameMode == "Puzzle" ? `https://localhost:5270/api/Chess/puzzle` :
+                    selectedGameOptions.gameMode == "Freeplay" ?      `https://localhost:5270/api/Chess/freeplay` :
+                    selectedGameOptions.gameMode == "Multiplayer" ?   `https://localhost:5270/api/Chess/multiplayer` :
+                                                            `https://localhost:5270/api/Chess/bot`; // bot
+
                 // no id — create new game (existing logic)
                 let body = JSON.stringify({});
-                if (selectedGameOptions?.selectedColor === "white") {
-                    body = JSON.stringify({
-                        GameMode: selectedGameOptions?.gameMode,
-                        BlackId: -1,
-                        WhiteId: user.id
-                    });
-                } else {
-                    body = JSON.stringify({
-                        GameMode: selectedGameOptions?.gameMode,
-                        WhiteId: -1,
-                        BlackId: user.id
-                    });
+                switch (selectedGameOptions?.gameMode) {
+                    case ChessGameMode.puzzle: 
+                    case ChessGameMode.bot: {
+                        if (selectedGameOptions?.selectedColor === "white") {
+                            body = JSON.stringify({
+                                GameMode: selectedGameOptions?.gameMode,
+                                BlackId: -1,
+                                WhiteId: user.id
+                            });
+                        } else {
+                            body = JSON.stringify({
+                                GameMode: selectedGameOptions?.gameMode,
+                                WhiteId: -1,
+                                BlackId: user.id
+                            });
+                        }
+                        break;
+                    }
+
+                    case ChessGameMode.freeplay: {
+                        body = JSON.stringify({
+                            GameMode: selectedGameOptions?.gameMode,
+                            WhiteId: user.id,
+                            BlackId: user.id
+                        });
+                    }
                 }
 
-                const res = await fetch(`https://localhost:5270/api/Chess/new/`, {
+
+                const res = await fetch(path, {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -192,6 +215,8 @@ function ChessBoardProvider({
     const attack = useCallback(async (clickedPiece: ChessPiece, promotion: PromotionType | null = null) => {
         if (chessGame === null || selectedPiece === null || clickedPiece === null || isMoving) return;
 
+        if (promotion)
+            console.log("promotion")
         const previousGame = chessGame;
         const optimisticGame = buildOptimisticGame(chessGame, selectedPiece, clickedPiece);
 
@@ -211,10 +236,9 @@ function ChessBoardProvider({
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    Move: `${selectedPiece?.position},${clickedPiece.position}`,
+                    Move: `${selectedPiece?.position},${clickedPiece.position}${(promotion == 5) ? "q" : (promotion == 4) ? "r" : (promotion == 3) ? "b" : (promotion == 2) ? "n" : ""}` ,
                     User: user?.username,
-                    GameId: chessGame?.id,
-                    Promotion: promotion  
+                    GameId: chessGame?.id
                 }),
             });
 
@@ -232,9 +256,17 @@ function ChessBoardProvider({
 
     }, [chessGame, selectedPiece, user, isMoving, handleSetChessGame]);
 
+    const choosePromotion = (promoSquare: PromotionSquare) => {
+        if (!promotionInfo) return;
+        attack(promotionInfo.to, promoSquare.promotionType);
+        setPromotionInfo(null);
+        setSelectedPiece(null);
+    };
+
     // context value
     const value = useMemo<ChessBoardContextValue>(
         () => ({
+            choosePromotion,
             chessGame,
             selectedPiece,
             setSelectedPiece,

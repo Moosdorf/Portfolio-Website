@@ -1,10 +1,8 @@
-// InfoPanel.tsx
 import { useChessBoard } from './ChessBoardContext';
 
 interface InfoPanelProps {
     title: string;
     children: React.ReactNode;
-    /** extra status states beyond check/checkmate, e.g. puzzle solved/revealed */
     extraStatus?: { condition: boolean; className: string; label: string }[];
 }
 

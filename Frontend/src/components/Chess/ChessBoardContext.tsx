@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { ChessBoard, ChessGame, ChessPiece, PromotionInformation, SelectedGameOptions } from './ChessTypes';
+import type { ChessBoard, ChessGame, ChessPiece, PromotionInformation, PromotionSquare, SelectedGameOptions } from './ChessTypes';
 import type { ChessGameMode } from './ChessTypes';
 
 export type ChessBoardContextValue = {
@@ -17,9 +17,10 @@ export type ChessBoardContextValue = {
     isViewingHistory: boolean;
     displayedBoard: ChessBoard | null;
     isMoving: boolean;
-    attack: (clickedPiece: ChessPiece, promotionType: number) => void;
+    attack: (clickedPiece: ChessPiece, promotionType?: number | null) => void;
     setActivePlayer: (activePlayer: string | null) => void;
     setPromotionInfo: (promotionInfo: PromotionInformation | null) => void;
+    choosePromotion: (promotionInfo: PromotionSquare) => void;
     setSelectedPiece: (piece: ChessPiece | null) => void;
     selectedGameOptions?: SelectedGameOptions;
 };

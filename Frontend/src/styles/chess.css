@@ -35,32 +35,13 @@
 }
 
 /* ============================== */
-/* Selection Panel                 */
+/* promotions                     */
 /* ============================== */
 
-.selection-panel {
-  background: var(--panel-bg);
-  color: var(--panel-text);
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--panel-border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  max-width: 32rem;
-  margin: 2rem auto;
+.promotion {
+  background-color: silver;
 }
 
-.selection-panel h3,
-.selection-panel h4 {
-  color: var(--panel-text);
-  font-weight: 600;
-}
-
-.selection-panel .selection-title {
-  text-decoration: underline;
-}
 
 /* ============================== */
 /* Board + Outside Labels          */

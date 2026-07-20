@@ -13,12 +13,14 @@ interface PieceDisplayProps {
 
 function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget }: PieceDisplayProps) {
     const { chessGame, selectedPiece, setSelectedPiece, promotionInfo, setPromotionInfo,
-        activePlayer, attack, isMoving, isViewingHistory } = useChessBoard()
+        activePlayer, attack, isMoving, isViewingHistory } = useChessBoard();
+
     const { user } = useAuth();
 
     const promotionListSortedHighToLow = [PromotionType.queen, PromotionType.rook, PromotionType.bishop, PromotionType.knight];
     const whitesTurn = chessGame?.chessBoard.turn === "w";
     const isMyTurn = !!user && activePlayer === user.username;
+    const isPromotingFrom = promotionInfo?.from.position === piece.position;
 
     const drag = (e: React.DragEvent<HTMLDivElement>, piece: ChessPiece) => {
         e.currentTarget.style.opacity = '0.6';
@@ -72,34 +74,32 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
     };
 
     const handleOnClick = (clickedPiece: ChessPiece) => {
-        
-        console.log(1)
-        console.log(isViewingHistory)
-        console.log(isMoving)
-        console.log(promotionInfo)
-        if (isViewingHistory || isMoving || promotionInfo) return;
-        console.log(2)
+        console.log(clickedPiece)
+        if (isViewingHistory || isMoving) return;
+
+        if (promotionInfo) {
+            setPromotionInfo(null);
+            setSelectedPiece(null);
+            return;
+        }
+
         if (CheckForPromotion(clickedPiece)) return;
-        console.log(3)
 
         if (selectedPiece === null) {
             addSelected(clickedPiece);
             return;
         }
-        console.log(4)
 
         if (clickedPiece === selectedPiece) {
             removeSelected();
             return;
         }
 
-        console.log(5)
         // if the clicked piece belongs to the same side, reselect it instead of attacking
         if (clickedPiece.isWhite === selectedPiece.isWhite && clickedPiece.type !== PieceType.empty) {
             addSelected(clickedPiece);
             return;
         }
-        console.log(6)
         tryAttack(clickedPiece);
     };
 
@@ -119,6 +119,7 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
     };
 
     const CheckForPromotion = (clickedPiece: ChessPiece) => {
+
         if (selectedPiece === null || selectedPiece.type !== PieceType.pawn) return false;
 
         const targetRank = clickedPiece.position[1];
@@ -149,7 +150,6 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
         }
         return false;
     }
-
     return (
         <div
             className={squareClass}
@@ -157,7 +157,7 @@ function PieceDisplay({ piece, squareClass, pieceClass, color, isMove, isTarget 
             onDragOver={dragOver}
             onDrop={() => onDrop(piece)}
         >
-            {piece.type != PieceType.empty &&
+            {piece.type != PieceType.empty && !isPromotingFrom && 
                 <img
                     className={pieceClass}
                     alt=""

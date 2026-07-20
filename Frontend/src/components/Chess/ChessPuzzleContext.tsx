@@ -1,4 +1,3 @@
-// components/Chess/ChessPuzzleContext.tsx
 import { createContext, useContext } from 'react';
 import type { ChessPuzzle } from './ChessTypes';
 

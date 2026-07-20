@@ -9,8 +9,10 @@ interface ChessSquareProps {
     colIndex: number;
 }
 
+
+
 function ChessSquare({ piece, rankIndex, colIndex }: ChessSquareProps) {
-    const { displayedBoard, selectedPiece, activePlayer, isViewingHistory } = useChessBoard();
+    const { displayedBoard, selectedPiece, activePlayer, isViewingHistory, promotionInfo, choosePromotion } = useChessBoard();
     const { user } = useAuth();
 
     const isSelected = piece === selectedPiece;
@@ -36,6 +38,27 @@ function ChessSquare({ piece, rankIndex, colIndex }: ChessSquareProps) {
 
     const pieceClass = `piece${isCurrentTurn ? " currentTurn" : ""}`;
 
+    if (promotionInfo && promotionInfo.options.find(o => o.position == piece.position)) {
+        let squareClass = `square promotion`;
+        let promoInfo = promotionInfo.options.find(o => o.position == piece.position)
+        if (!promoInfo) return null;
+
+        return (
+        <div
+            className={squareClass}
+            onClick={() => choosePromotion(promoInfo)}
+        >
+            <img
+                className={pieceClass}
+                alt=""
+                src={`/chess_images/${whitesTurn ? "white" : "black"}-${promoInfo.promotionType}.png`}
+            />
+            {isTarget && <div className="target" />}
+            {isMove && <div className="move" />}
+        </div>
+        );
+    } 
+
     return (
         <PieceDisplay
             piece={piece}
@@ -44,7 +67,7 @@ function ChessSquare({ piece, rankIndex, colIndex }: ChessSquareProps) {
             color={color}
             isMove={isMove}
             isTarget={isTarget}
-        />
+            />
     );
 }
 
