@@ -9,6 +9,8 @@ import MoveHistory from "../../../components/Chess/MoveHistory";
 import SelectionPanel from "../../../components/SelectionPanel";
 import { Link } from "react-router-dom";
 import InfoPanel from "../../../components/Chess/InfoPanel";
+import PuzzleInfoPanel from "../../../components/Chess/PuzzleInfoPanel";
+
 
 function ChessPuzzle() {
     return (
@@ -20,8 +22,33 @@ function ChessPuzzle() {
 
 function ChessPuzzleDisplay() {
     const { user } = useAuth();
-    const { currentPuzzle, fetchNewPuzzle, isFetching, getHint, hint, revealSolution, isRevealed, isSolved } = useChessPuzzle();
-    const { chessGame } = useChessBoard();
+    const {
+        currentPuzzle,
+        fetchRandomPuzzle,
+        isFetchingRandom,
+        fetchRankedPuzzle,
+        isFetchingRanked,
+        getHint,
+        hint,
+        revealSolution,
+        isRevealed,
+        isSolved,
+        puzzleMode,
+        wrongMoveMade,
+        invalidMoves,
+    } = useChessPuzzle();
+
+    const {
+        chessGame,
+        chessHistory,
+        viewIndex,
+        setViewIndex,
+        goToPrevious,
+        goToNext,
+        goToCurrent,
+        isViewingHistory,
+    } = useChessBoard();
+
     const [selectingTag, setSelectingTag] = useState(false);
 
     if (currentPuzzle == null) {
@@ -34,10 +61,12 @@ function ChessPuzzleDisplay() {
         return (
             <SelectionPanel title="Puzzles" subtitle="Select Gamemode">
                 <div className="flex gap-4 justify-center">
-                    <Button variant="secondary" onClick={() => fetchNewPuzzle()} disabled={!user || isFetching}>
-                        {isFetching ? "Loading..." : "Random Puzzle"}
+                    <Button variant="secondary" onClick={() => fetchRandomPuzzle()} disabled={!user || isFetchingRandom}>
+                        {isFetchingRandom ? "Loading..." : "Random Puzzle"}
                     </Button>
-                    <Button variant="secondary">Rated Puzzles</Button>
+                    <Button onClick={() => fetchRankedPuzzle()} variant="secondary" disabled={!user || isFetchingRanked}>
+                        {isFetchingRanked ? "Loading..." : "Ranked Puzzle"}
+                    </Button>
                     <Button variant="secondary" onClick={() => setSelectingTag(true)}>Puzzle Tags</Button>
                 </div>
 
@@ -48,7 +77,7 @@ function ChessPuzzleDisplay() {
         );
     }
 
-    if (chessGame == null) {
+    if (chessGame == null || user == null) {
         return <div>loading puzzle</div>;
     }
 
@@ -59,7 +88,12 @@ function ChessPuzzleDisplay() {
     const bottomTurn = isUserWhite ? "w" : "b";
 
     const handleNextPuzzle = () => {
-        fetchNewPuzzle();
+        switch (puzzleMode.puzzleType) {
+            case "ranked": fetchRankedPuzzle();
+            break
+            case "random": fetchRandomPuzzle();
+            break
+        }
     };
 
     return (
@@ -74,18 +108,23 @@ function ChessPuzzleDisplay() {
                 <ChessBoardGrid/>
 
                 <div className={`player-bar ${chessGame.chessBoard.turn === bottomTurn ? "active" : ""}`}>
-                    <span className="player-name">{bottomPlayer}</span>
+                    <span className="player-name">{bottomPlayer} - Current Rating: {user.puzzleRating}</span>
                 </div>
-            </div>
-            
 
-            <InfoPanel
-                title="Puzzle Info"
-                extraStatus={[
-                    { condition: isSolved, className: "status-solved", label: "Puzzle Solved!" },
-                    { condition: isRevealed && !isSolved, className: "status-revealed", label: "Solution revealed" },
-                ]}
-            >
+            </div>
+
+                <PuzzleInfoPanel
+                    title="Puzzle Info"
+                    extraStatus={[
+                        { condition: puzzleMode.puzzleType == "ranked", className: "status-ranked", label: "RANKED" },
+                        { condition: isRevealed, className: "status-revealed", label: "Solution revealed" },
+                        { condition: wrongMoveMade && !isRevealed && !isSolved, className: "status-failed", label: "Puzzle failed" },
+                        { condition: wrongMoveMade && !isRevealed && isSolved, className: "status-failed", label: "Puzzle failed: finished" },
+                        { condition: isSolved && !isRevealed && !wrongMoveMade, className: "status-solved", label: "Puzzle Solved!" },
+                        { condition: hint.length > 0 && !isRevealed, className: "status-hint", label: "Hint used" },
+                    ]}
+                >
+
                 <h5 className="puzzle-id">#{currentPuzzle.puzzleId}</h5>
 
                 {currentPuzzle.tags?.length > 0 && (
@@ -102,26 +141,22 @@ function ChessPuzzleDisplay() {
                     {<h5>Last move: {chessGame.chessBoard.lastMove && chessGame.chessBoard.lastMove}</h5>}
                 </div>
 
-
-
-                <MoveHistory chessHistory={[]} viewIndex={null} isViewingHistory={false} setViewIndex={function (index: number | null): void {
-                    throw new Error("Function not implemented.");
-                } } goToPrevious={function (): void {
-                    throw new Error("Function not implemented.");
-                } } goToNext={function (): void {
-                    throw new Error("Function not implemented.");
-                } } goToCurrent={function (): void {
-                    throw new Error("Function not implemented.");
-                } } />
-
-
+                <MoveHistory
+                    chessHistory={chessHistory}
+                    viewIndex={viewIndex}
+                    isViewingHistory={isViewingHistory}
+                    setViewIndex={setViewIndex}
+                    goToPrevious={goToPrevious}
+                    goToNext={goToNext}
+                    goToCurrent={goToCurrent}
+                />
 
                 <div className="puzzle-actions">
-                    <Button variant="secondary" onClick={getHint} disabled={isSolved || isRevealed || !hint} className="w-19">Hint</Button>
+                    <Button variant="secondary" onClick={getHint} disabled={isSolved || isRevealed} className="w-19">Hint</Button>
                     <Button variant="secondary" onClick={revealSolution} disabled={isSolved || isRevealed}>Reveal Solution</Button>
                 </div>
-                <Button variant="secondary" onClick={handleNextPuzzle} disabled={isFetching}>
-                    {isFetching ? "Loading..." : "Next Puzzle"}
+                <Button variant="secondary" onClick={handleNextPuzzle} disabled={isFetchingRandom || isFetchingRanked}>
+                    {(isFetchingRandom || isFetchingRanked)  ? "Loading..." : "Next Puzzle"}
                 </Button>
 
 
@@ -129,7 +164,7 @@ function ChessPuzzleDisplay() {
                     <span>{currentPuzzle.nbPlays.toLocaleString()} plays</span>
                     <span>{currentPuzzle.popularity}% popularity</span>
                 </div>
-            </InfoPanel>
+            </PuzzleInfoPanel>
 
         </div>
     );

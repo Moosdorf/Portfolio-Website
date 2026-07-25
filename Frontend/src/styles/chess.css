@@ -537,6 +537,69 @@
 }
 
 /* ============================== */
+/* Hint highlight                  */
+/* ============================== */
+
+.square.light.hint {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 35%,
+      rgba(34, 197, 94, 0.55) 100%
+    ),
+    #f0d9b5 !important;
+  border: 2px solid rgba(34, 197, 94, 0.7);
+  box-shadow: inset 0 0 8px rgba(34, 197, 94, 0.3);
+  z-index: 3;
+}
+
+.square.dark.hint {
+  background:
+    radial-gradient(
+      circle farthest-corner,
+      transparent 35%,
+      rgba(34, 197, 94, 0.55) 100%
+    ),
+    #b58863 !important;
+  border: 2px solid rgba(34, 197, 94, 0.7);
+  box-shadow: inset 0 0 8px rgba(34, 197, 94, 0.3);
+  z-index: 3;
+}
+
+/* ============================== */
+/* Invalid move pills              */
+/* ============================== */
+
+.invalid-moves-section {
+  margin-top: 0.75rem;
+}
+
+.invalid-moves-heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--panel-text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.invalid-moves-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.invalid-move-pill {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9px;
+  font-family: 'Courier New', monospace;
+}
+
+/* ============================== */
 /* Player Bars                     */
 /* ============================== */
 

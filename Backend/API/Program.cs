@@ -21,6 +21,7 @@ var db = Environment.GetEnvironmentVariable("POSTGRES_DB");
 var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
 var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+var clientURL = Environment.GetEnvironmentVariable("CLIENT_URL");
 
 var connectionString = $"Host=localhost;Port=5432;Database={db};Username={user};Password={password}";
 
@@ -52,9 +53,9 @@ builder.Services.AddCors(options => // https://learn.microsoft.com/en-us/aspnet/
     options.AddPolicy(name: "AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("https://localhost:3000").AllowAnyMethod()
-                                                        .AllowAnyHeader()
-                                                        .AllowCredentials();
+            policy.WithOrigins(clientURL).AllowAnyMethod()
+                                        .AllowAnyHeader()
+                                        .AllowCredentials();
         });
 });
 

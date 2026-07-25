@@ -1,9 +1,11 @@
 ﻿using Backend.Application.Chess.DTO;
-using Backend.Domain.Entities.Chess;
 using Backend.Domain.Entities.Chess.Games;
-using DataLayer.csv_scripts;
+using Backend.Domain.Entities.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Eventing.Reader;
+using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace Backend.Application.Chess.Services;
@@ -47,7 +49,7 @@ public class PuzzleDataService : IPuzzleDataService
         return CreatePuzzleDTO(puzzle);
     }
 
-    public PuzzleDTO GetRankedPuzzle(int rating)
+    public PuzzleDTO? GetRankedPuzzle(int rating)
     {
         int minRating = rating - 50;
         int maxRating = rating + 50;
@@ -61,7 +63,7 @@ public class PuzzleDataService : IPuzzleDataService
         var randomOffset = _random.Next(0, count);
 
         var puzzle = query
-            .OrderBy(p => p.Id) // stable, indexed order for Skip to work correctly
+            .OrderBy(p => p.Id) 
             .Skip(randomOffset)
             .Take(1)
             .Include(p => p.PuzzleTags)
@@ -69,6 +71,58 @@ public class PuzzleDataService : IPuzzleDataService
             .FirstOrDefault();
 
         return puzzle == null ? null : CreatePuzzleDTO(puzzle);
+    }
+
+    public int AdjustPuzzleRating(string username, bool successful)
+    {
+        var user = _db.Users.FirstOrDefault(u => u.Username == username);
+
+        if (user == null) return 0;
+
+        if (successful) {
+            user.PuzzleRating += 10;
+        }
+        else
+        {
+            user.PuzzleRating -= 10;
+        }
+
+        return (_db.SaveChanges() > 0) ? user.PuzzleRating : 0;
+    }
+
+    public bool IsPuzzleSolved(string puzzleId, string[] moves)
+    {
+        // get puzzle
+        var query = _db.Puzzles
+                .Where(p => p.PuzzleId == puzzleId);
+        var puzzle = query.FirstOrDefault();
+        Console.WriteLine(4.1);
+
+
+        // check if puzzle and moves exists
+        Console.WriteLine(puzzle == null);
+
+        Console.WriteLine(moves.Length == 0 );
+
+        if (puzzle == null || moves.Length == 0) return false;
+        Console.WriteLine(4.2);
+        var movesToCheck = puzzle.Moves.Split(" ")
+                .Select(x => x.Insert(2, ","))
+                .Where((x, i) => i % 2 != 0)
+                .ToArray();
+        Console.WriteLine("player moves");
+        foreach (var x in moves)
+        {
+            Console.WriteLine(x);
+        }
+
+        Console.WriteLine("Best moves");
+        foreach (var x in movesToCheck)
+        {
+            Console.WriteLine(x);
+        }
+
+        return moves.SequenceEqual(movesToCheck);
     }
 
     public PuzzleDTO CreatePuzzleDTO(Puzzle puzzle)

@@ -1,15 +1,25 @@
 import { createContext, useContext } from 'react';
-import type { ChessPuzzle } from './ChessTypes';
+import type { ChessPuzzle, ChessPuzzleResult } from './ChessTypes';
+import type { PuzzleMode } from '../../data/providers/ChessPuzzleProvider';
+
+
 
 export type ChessPuzzleContextValue = {
     currentPuzzle: ChessPuzzle | null;
-    fetchNewPuzzle: () => Promise<void>;
-    isFetching: boolean;
-    hint: string | null;
+    fetchRandomPuzzle: () => Promise<void>;
+    fetchRankedPuzzle: () => Promise<void>;
+    isFetchingRandom: boolean;
+    isFetchingRanked: boolean;
     getHint: () => void;
+    hint: string[];
+    currentHintSquare: string | null;
     revealSolution: () => void;
     isRevealed: boolean;
     isSolved: boolean;
+    puzzleMode: PuzzleMode;
+    chessPuzzleResult: ChessPuzzleResult | null;
+    wrongMoveMade: boolean;
+    invalidMoves: string[];
 };
 
 export const ChessPuzzleContext = createContext<ChessPuzzleContextValue | undefined>(undefined);

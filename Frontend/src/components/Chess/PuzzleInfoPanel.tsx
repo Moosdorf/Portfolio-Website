@@ -1,12 +1,13 @@
 import { useChessBoard } from './ChessBoardContext';
 
-interface InfoPanelProps {
+interface PuzzleInfoPanelProps {
     title: string;
     children: React.ReactNode;
     extraStatus?: { condition: boolean; className: string; label: string }[];
+    invalidMoves?: string[];
 }
 
-function InfoPanel({ title, children, extraStatus = [] }: InfoPanelProps) {
+function PuzzleInfoPanel({ title, children, extraStatus = [], invalidMoves = [] }: PuzzleInfoPanelProps) {
     const { chessGame } = useChessBoard();
     if (!chessGame) return null;
 
@@ -38,8 +39,21 @@ function InfoPanel({ title, children, extraStatus = [] }: InfoPanelProps) {
             </div>
 
             {children}
+
+            {invalidMoves.length > 0 && (
+                <div className="invalid-moves-section">
+                    <h5 className="invalid-moves-heading">Incorrect attempts</h5>
+                    <div className="invalid-moves-list">
+                        {invalidMoves.map((move, i) => (
+                            <span key={`${move}-${i}`} className="invalid-move-pill">
+                                {move.replace(',', ' → ')}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
-export default InfoPanel;
+export default PuzzleInfoPanel;

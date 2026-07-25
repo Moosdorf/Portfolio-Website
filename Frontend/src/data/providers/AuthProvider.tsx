@@ -104,6 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const user = await response.json();
         setUser(user)
+        console.log(user)
         return true;
     };
 

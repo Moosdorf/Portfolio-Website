@@ -120,6 +120,12 @@ export interface ChessPuzzle {
   tags: string[]
 }
 
+export interface ChessPuzzleResult {
+  puzzleId: string
+  movesMade: string[]
+  hintUsed: boolean
+  puzzleRevealed: boolean
+}
 
 
 // --- Users & game wrapper ---------------------------------------------

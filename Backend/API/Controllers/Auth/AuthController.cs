@@ -83,7 +83,8 @@ public class AuthController(IAuthService authService, IUserService userService) 
         {
             user.Id,
             user.Username,
-            user.Email
+            user.Email,
+            user.PuzzleRating
         });
     }
 

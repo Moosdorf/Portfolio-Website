@@ -95,3 +95,4 @@ Backend/Domain/Entities/Chess/lichess_db_puzzle.csv
 /Backend/Stockfish/windows
 /Backend/Stockfish/linux
 /Backend/Stockfish
+repomix-output.xml

@@ -1,5 +1,7 @@
+import { useContext } from "react";
 import { useAuth } from "../../data/providers/AuthProvider";
 import { useChessBoard } from "./ChessBoardContext";
+import { ChessPuzzleContext } from "./ChessPuzzleContext";
 import { PieceType, type ChessPiece } from "./ChessTypes";
 import PieceDisplay from "./PieceDisplay";
 
@@ -9,11 +11,12 @@ interface ChessSquareProps {
     colIndex: number;
 }
 
-
-
 function ChessSquare({ piece, rankIndex, colIndex }: ChessSquareProps) {
     const { displayedBoard, selectedPiece, activePlayer, isViewingHistory, promotionInfo, choosePromotion } = useChessBoard();
     const { user } = useAuth();
+
+    const puzzleCtx = useContext(ChessPuzzleContext);
+    const latestHint = puzzleCtx?.currentHintSquare ?? null;
 
     const isSelected = piece === selectedPiece;
     const whitesTurn = displayedBoard?.turn === "w";
@@ -30,6 +33,8 @@ function ChessSquare({ piece, rankIndex, colIndex }: ChessSquareProps) {
     const lastMoves = displayedBoard?.lastMove.split(",");
     if (lastMoves && piece.position === lastMoves[1]) squareClass += " movedTo";
     if (lastMoves && piece.position === lastMoves[0]) squareClass += " movedFrom";
+
+    if (latestHint && piece.position === latestHint) squareClass += " hint";
 
     if (piece.type === PieceType.king && piece.isWhite === whitesTurn) {
         if (displayedBoard?.inCheck) squareClass += " check";
