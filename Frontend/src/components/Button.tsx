@@ -4,7 +4,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export function Button({ variant = "primary", className = "", ...props }: ButtonProps) {
-  const base = "p-2 rounded transition-colors";
+  const base = "p-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none";
   const variants = {
     primary: "bg-(--accent) text-white hover:opacity-90 cursor-pointer",
     secondary:

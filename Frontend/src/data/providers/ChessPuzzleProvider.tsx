@@ -31,10 +31,11 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     const [puzzleMode, setPuzzleMode] = useState<PuzzleMode>({puzzleType: "none"});
     const [chessPuzzleResult, setChessPuzzleResult] = useState<ChessPuzzleResult | null>(null);
     const [movesMade, setMovesMade] = useState<string[]>([])
-    const [ratingChanged, setRatingChanged] = useState(0);
     const [hintActive, setHintActive] = useState(false);
     const puzzleSessionRef = useRef(0);
-    
+    const [puzzleAttemptResult, setPuzzleAttemptResult] = useState<ChessPuzzleAttempt | null>(null);
+    const [showResultModal, setShowResultModal] = useState(false);
+
     const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
 
@@ -59,6 +60,8 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         setHint([])
         setMovesMade([])
         amILoggedIn();
+        setPuzzleAttemptResult(null)  
+        setShowResultModal(false)     
     }
 
     const {
@@ -183,6 +186,7 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
         let puzzleSolvedResponse = await api.put<ChessPuzzleAttempt>('/api/puzzle/ranked/result', chessPuzzleResult, {credentials: 'include'});
         console.log(puzzleSolvedResponse)
+        setPuzzleAttemptResult(puzzleSolvedResponse);
 
     }, [chessPuzzleResult])
 
@@ -292,6 +296,13 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         }
     }, [hintSquare]);
 
+    useEffect(() => {
+        if (chessPuzzleResult) {
+            setShowResultModal(true);
+        }
+    }, [chessPuzzleResult]);
+    const closeResultModal = useCallback(() => setShowResultModal(false), []);
+
     const currentHintSquare = hintActive ? hintSquare : null;
 
     const choosePromotion = (promoSquare: PromotionSquare) => {
@@ -323,6 +334,9 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
         displayedBoard,
         isMoving,
         attack,
+        forfeit: async () => {},
+        requestDraw: async () => {},
+        isEndingGame: false,
     }), [
         currentChessGame, selectedPiece, promotionInfo, user, chessHistory, viewIndex,
         setViewIndex, goToPrevious, goToNext, goToCurrent, isViewingHistory, displayedBoard,
@@ -331,6 +345,9 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
     return (
         <ChessPuzzleContext.Provider value={{
+            showResultModal,
+            closeResultModal,
+            puzzleAttemptResult,
             currentPuzzle: chessPuzzle ?? null,
             fetchRandomPuzzle: fetchNewPuzzle,
             fetchRankedPuzzle,
@@ -345,7 +362,8 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             chessPuzzleResult: chessPuzzleResult,
             puzzleMode: puzzleMode,
             wrongMoveMade: wrongMoveMade,
-            invalidMoves: invalidMoves
+            invalidMoves: invalidMoves,
+
         }}>
             <ChessBoardContext.Provider value={value}>
                 {children}

@@ -98,15 +98,11 @@ public class PuzzleDataService : IPuzzleDataService
         // get user
         var user = _db.Users.Include(u => u.PuzzleAttempts)
                              .FirstOrDefault(u => u.Username == username);
-        Console.WriteLine("user");
-        Console.WriteLine(user);
 
         // get puzzle
         var query = _db.Puzzles
                 .Where(p => p.PuzzleId == chessPuzzleResult.PuzzleId);
         var puzzle = query.FirstOrDefault();
-        Console.WriteLine("puzzle");
-        Console.WriteLine(puzzle);
 
         if (puzzle == null || user == null || (moves.Length == 0 && !chessPuzzleResult.HintUsed && !chessPuzzleResult.PuzzleRevealed)) return null;
 

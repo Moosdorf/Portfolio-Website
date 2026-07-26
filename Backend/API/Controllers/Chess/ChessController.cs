@@ -19,26 +19,28 @@ namespace Backend.API.Controllers;
 [Route("api/chess")]
 public class ChessController : HomeController
 {
-    IChessDataService chessDataService;
-    IStockFishService stockFish;
+    private readonly IHubContext<ChessHub> _chessHub;
+    private readonly IChessDataService _chessDataService;
+    private readonly IStockFishService _stockFish;
 
-    public ChessController(IChessDataService chessDataService, IStockFishService stockFish)
+    public ChessController(IHubContext<ChessHub> chessHub, IChessDataService chessDataService, IStockFishService stockFish)
     {
-        this.chessDataService = chessDataService;
-        this.stockFish = stockFish;
+        _chessDataService = chessDataService;
+        _stockFish = stockFish;
+        _chessHub = chessHub;
     }
 
     [HttpGet]
     [Route("{id}")]
     public async Task<IActionResult> GetGameState(int id)
     {
-        ChessGame? game = await chessDataService.GetGameAsync(id);
+        ChessGame? game = await _chessDataService.GetGameAsync(id);
         if (game == null) return NotFound("Cannot find game");
 
         var username = User.FindFirstValue(ClaimTypes.Name);
         var role = ResolveRole(game, username);
 
-        return Ok(chessDataService.CreateChessModel(new ChessBoard(game.CurrentFEN), game, role));
+        return Ok(_chessDataService.CreateChessModel(new ChessBoard(game.CurrentFEN), game, role));
     }
 
     private string ResolveRole(ChessGame game, string? username)
@@ -78,7 +80,7 @@ public class ChessController : HomeController
 
         if (model.GameMode != expectedGameMode) return BadRequest("Wrong gamemode");
 
-        var (game, chessState) = await chessDataService.CreateGameAsync(model);
+        var (game, chessState) = await _chessDataService.CreateGameAsync(model);
 
         if (game == null)
         {
@@ -86,14 +88,14 @@ public class ChessController : HomeController
             return NotFound();
         }
 
-        return Ok(chessDataService.CreateChessModel(chessState, game, "non"));
+        return Ok(_chessDataService.CreateChessModel(chessState, game, "non"));
     }
 
     [HttpPut]
     [Route("{id}/move")]
     public async Task<IActionResult> Move(int id, [FromBody] MoveModel moveModel)
     {
-        var result = await chessDataService.MakeMoveAsync(id, moveModel);
+        var result = await _chessDataService.MakeMoveAsync(id, moveModel);
         if (result == null) return BadRequest("Cannot make move");
         return Ok(result);
     }
@@ -102,16 +104,48 @@ public class ChessController : HomeController
     [Route("bot/{id}/move")]
     public async Task<IActionResult> MoveBot(int id, [FromBody] MoveModel moveModel)
     {
-        var result = await chessDataService.MakePlayerMoveWithBotReplyAsync(id, moveModel);
+        var result = await _chessDataService.MakePlayerMoveWithBotReplyAsync(id, moveModel);
         if (result == null) return BadRequest("Cannot make move");
         return Ok(result);
+    }
+
+    [HttpPut("{id}/forfeit")]
+    public async Task<IActionResult> Forfeit(int id)
+    {
+        (ChessGame game, ChessBoard chessState) = await _chessDataService.Forfeit(id);
+
+        // push to everyone in the game's SignalR group
+        await _chessHub.Clients.Group($"game-{id}").SendAsync("BoardUpdated", game);
+
+        return Ok(_chessDataService.CreateChessModel(chessState, game, "non"));
+    }
+
+    [HttpPut("{id}/draw")]
+    public async Task<IActionResult> Draw(int id)
+    {
+        (ChessGame game, ChessBoard chessState) = await _chessDataService.Draw(id);
+
+        // push to everyone in the game's SignalR group
+        await _chessHub.Clients.Group($"game-{id}").SendAsync("BoardUpdated", game);
+
+        return Ok(_chessDataService.CreateChessModel(chessState, game, "non"));
+    }
+    [HttpPut("{id}/request-draw")]
+    public async Task<IActionResult> RequestDraw(int id)
+    {
+        var username = User.FindFirstValue(ClaimTypes.Name);
+
+        // push to everyone in the game's SignalR group
+        await _chessHub.Clients.Group($"game-{id}").SendAsync("RequestDraw", new { User = username, GameID = id});
+
+        return Ok();
     }
 
     [HttpGet]
     [Route("stockfish")]
     public async Task<IActionResult> StartStocky()
     {
-        stockFish.StartNewStockFishGame();
+        _stockFish.StartNewStockFishGame();
         return Ok();
     }
 }

@@ -83,6 +83,7 @@ function ChessBoardProvider({
     const [isMoving, setIsMoving] = useState(false);
     const { user } = useAuth();
     const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
+    const [isEndingGame, setIsEndingGame] = useState(false);
 
     const {
         viewIndex,
@@ -142,6 +143,7 @@ function ChessBoardProvider({
         };
     }, [connection, chessGame?.id]);
 
+    // htttps request, join game
     useEffect(() => {
         async function loadOrCreateGame() {
             try {
@@ -233,6 +235,34 @@ function ChessBoardProvider({
 
     }, [chessGame, selectedPiece, user, isMoving, handleSetChessGame]);
 
+    const forfeit = useCallback(async () => {
+        if (!chessGame || isEndingGame) return;
+
+        setIsEndingGame(true);
+        try {
+            const game = await api.put<ChessGame>(`/api/chess/${chessGame.id}/forfeit`, {}, { credentials: 'include' });
+            handleSetChessGame(game);
+        } catch (err) {
+            console.error('Forfeit failed:', err);
+        } finally {
+            setIsEndingGame(false);
+        }
+    }, [chessGame, isEndingGame, handleSetChessGame]);
+
+    const requestDraw = useCallback(async () => {
+        if (!chessGame || isEndingGame) return;
+
+        setIsEndingGame(true);
+        try {
+            const game = await api.put<ChessGame>(`/api/chess/${chessGame.id}/draw`, {}, { credentials: 'include' });
+            handleSetChessGame(game);
+        } catch (err) {
+            console.error('Draw request failed:', err);
+        } finally {
+            setIsEndingGame(false);
+        }
+    }, [chessGame, isEndingGame, handleSetChessGame]);
+
     const choosePromotion = (promoSquare: PromotionSquare) => {
         if (!promotionInfo) return;
         attack(promotionInfo.to, promoSquare.promotionType);
@@ -240,7 +270,6 @@ function ChessBoardProvider({
         setSelectedPiece(null);
     };
 
-    // context value
     const value = useMemo<ChessBoardContextValue>(
         () => ({
             choosePromotion,
@@ -263,10 +292,13 @@ function ChessBoardProvider({
             isMoving,
             attack,
             selectedGameOptions,
+            forfeit,
+            requestDraw,
+            isEndingGame,
         }),
         [chessGame, selectedPiece, promotionInfo, activePlayer, chessHistory, viewIndex,
         setViewIndex, goToPrevious, goToNext, goToCurrent, isViewingHistory, displayedBoard,
-        isMoving, attack, selectedGameOptions]
+        isMoving, attack, selectedGameOptions, forfeit, requestDraw, isEndingGame]
     );
 
     return (

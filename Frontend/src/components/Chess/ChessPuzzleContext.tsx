@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { ChessPuzzle, ChessPuzzleResult } from './ChessTypes';
+import type { ChessPuzzle, ChessPuzzleAttempt, ChessPuzzleResult } from './ChessTypes';
 import type { PuzzleMode } from '../../data/providers/ChessPuzzleProvider';
 
 
@@ -20,6 +20,9 @@ export type ChessPuzzleContextValue = {
     chessPuzzleResult: ChessPuzzleResult | null;
     wrongMoveMade: boolean;
     invalidMoves: string[];
+    showResultModal: boolean;
+    closeResultModal: () => void;
+    puzzleAttemptResult: ChessPuzzleAttempt | null;
 };
 
 export const ChessPuzzleContext = createContext<ChessPuzzleContextValue | undefined>(undefined);

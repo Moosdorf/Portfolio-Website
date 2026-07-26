@@ -18,4 +18,5 @@ public class ChessHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game-{gameId}");
         Console.WriteLine(gameId + ": left success");
     }
+
 }

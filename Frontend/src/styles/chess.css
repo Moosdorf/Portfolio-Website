@@ -635,6 +635,106 @@
   color: var(--panel-text);
 }
 
+
+/* ============================== */
+/* Modal                           */
+/* ============================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-card {
+  position: relative;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--panel-text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.modal-close:hover {
+  color: var(--panel-text);
+}
+
+.modal-title {
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.modal-status-line {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.modal-status-solved {
+  color: #4ade80;
+}
+
+.modal-status-failed {
+  color: #ff6b6b;
+}
+
+.rating-change {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+}
+
+.rating-arrow {
+  color: var(--panel-text-muted);
+}
+
+.rating-up {
+  color: #4ade80;
+}
+
+.rating-down {
+  color: #ff6b6b;
+}
+
+.rating-delta {
+  font-size: 0.85rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
 /* ============================== */
 /* Responsive                      */
 /* ============================== */

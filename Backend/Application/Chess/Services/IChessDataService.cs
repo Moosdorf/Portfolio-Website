@@ -20,4 +20,6 @@ public interface IChessDataService
     IList<ChessGame> GetGames();
 
     Task<ChessGame?> GetGameAsync(int chessId);
+    Task<(ChessGame game, ChessBoard chessState)> Draw(int id);
+    Task<(ChessGame game, ChessBoard chessState)> Forfeit(int id);
 }

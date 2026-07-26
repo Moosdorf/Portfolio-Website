@@ -13,10 +13,15 @@ import { Button } from '../Button';
 
 function  ChessBoardDisplay() {
     const { user } = useAuth();
-    const { chessGame, chessHistory, viewIndex, isViewingHistory, goToPrevious, goToNext, goToCurrent, setViewIndex } = useChessBoard();
+    const {
+        chessGame, chessHistory, viewIndex, isViewingHistory,
+        goToPrevious, goToNext, goToCurrent, setViewIndex,
+        forfeit, requestDraw, isEndingGame = false,
+    } = useChessBoard();
     const currentRowRef = useRef<HTMLDivElement>(null);
 
-    const [askForDrawSafety, setAskForDrawSafety] = useState(false);
+    const [pendingAction, setPendingAction] = useState<null | "forfeit" | "draw">(null);
+
 
     const currentIndex = viewIndex === null ? chessHistory.length - 1 : viewIndex;
 
@@ -66,7 +71,7 @@ function  ChessBoardDisplay() {
                     <h5>Game mode: {chessGame.gameType}</h5>
                     <h5>Move: {chessGame.chessBoard.fullMoveClock}</h5>
                     {chessGame.chessBoard.lastMove && <h5>Last move: {chessGame.chessBoard.lastMove}</h5>}
-                    {chessGame.gameType == "bot" && <p className="game-id">Game ID: {chessGame.id}</p>}
+                    {chessGame.gameType == "Bot" && <p className="game-id">Game ID: {chessGame.id}</p>}
 
                     <MoveHistory
                         chessHistory={chessHistory}
@@ -78,20 +83,45 @@ function  ChessBoardDisplay() {
                         goToCurrent={goToCurrent}
                     />
 
-                    {chessGame.gameType == "bot" && !askForDrawSafety && 
-                    <div className="history-nav">
-                        <Button variant='secondary'>Forfeit</Button>
-                        <Button variant='secondary' onClick={() => setAskForDrawSafety(true)}>Draw</Button> {/* ---> are you sure you want to ask for draw...  */}
-                    </div>}
-                    {chessGame.gameType == "bot" && askForDrawSafety && 
-                    <div className="history-nav">
-                        <p>Do you really wish to forfeit?</p>
-                        <Button variant='secondary' onClick={() => {
-                            setAskForDrawSafety(false)
-                            console.log("user sending a draw")
-                        }}>Yes</Button>
-                        <Button variant='secondary' onClick={() => setAskForDrawSafety(false)}>No</Button>
-                    </div>}
+                        {(chessGame.gameType === "Bot" || chessGame.gameType === "Multiplayer")
+                            && !chessGame.chessBoard.checkMate
+                            && chessGame.chessBoard.winner === null && (
+                            pendingAction === null ? (
+                            <div className="history-nav">
+                                <Button variant="secondary" disabled={isEndingGame} onClick={() => setPendingAction("forfeit")}>
+                                    Forfeit
+                                </Button>
+                                <Button variant="secondary" disabled={isEndingGame} onClick={() => setPendingAction("draw")}>
+                                    Draw
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="history-nav">
+                                <p>
+                                    {pendingAction === "forfeit"
+                                        ? "Are you sure you want to forfeit?"
+                                        : "Offer a draw?"}
+                                </p>
+                                <Button
+                                    variant="secondary"
+                                    disabled={isEndingGame}
+                                    onClick={async () => {
+                                        if (pendingAction === "forfeit") {
+                                            await forfeit?.();
+                                        } else {
+                                            await requestDraw?.();
+                                        }
+                                        setPendingAction(null);
+                                    }}
+                                >
+                                    {isEndingGame ? "…" : "Yes"}
+                                </Button>
+                                <Button variant="secondary" disabled={isEndingGame} onClick={() => setPendingAction(null)}>
+                                    No
+                                </Button>
+                            </div>
+                        )
+                    )}
 
 
                 </InfoPanel>

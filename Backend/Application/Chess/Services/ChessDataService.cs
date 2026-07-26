@@ -270,6 +270,30 @@ public class ChessDataService : IChessDataService
         return game;
     }
 
+    public async Task<(ChessGame game, ChessBoard chessState)?> Draw(int id)
+    {
+        var game = await _db.ChessGames
+                .Include(g => g.Moves)
+                .Include(g => g.BlackPlayer)
+                .Include(g => g.WhitePlayer)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+        if (game == null) return null;
+
+        game.Result = GameResult.Draw;
+        var saved = _db.SaveChanges() > 0;
+
+
+        if (saved) return (game, new ChessBoard(game.CurrentFEN));
+
+        return null;
+    }
+
+    public Task<(ChessGame game, ChessBoard chessState)> Forfeit(int id)
+    {
+        throw new NotImplementedException();
+    }
+
     public IList<ChessGame> GetGames()
     {
         throw new NotImplementedException();
@@ -279,4 +303,6 @@ public class ChessDataService : IChessDataService
     {
         throw new NotImplementedException();
     }
+
+
 }

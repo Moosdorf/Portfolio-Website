@@ -47,7 +47,7 @@ function MoveHistory({
 
                                 
             <div className="history-nav">
-                <Button variant='secondary' onClick={goToPrevious} disabled={viewIndex === 0}>{"<--"}</Button>
+                <Button variant='secondary' onClick={goToPrevious} disabled={viewIndex === 0 || chessHistory.length == 1}>{"<--"}</Button>
                 <Button variant='secondary' onClick={goToCurrent} disabled={!isViewingHistory}>●</Button>
                 <Button variant='secondary' onClick={goToNext} disabled={!isViewingHistory}>{"-->"}</Button>
             </div>

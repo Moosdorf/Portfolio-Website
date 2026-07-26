@@ -8,8 +8,8 @@ import { useChessBoard } from "../../../components/Chess/ChessBoardContext";
 import MoveHistory from "../../../components/Chess/MoveHistory";
 import SelectionPanel from "../../../components/SelectionPanel";
 import { Link } from "react-router-dom";
-import InfoPanel from "../../../components/Chess/InfoPanel";
 import PuzzleInfoPanel from "../../../components/Chess/PuzzleInfoPanel";
+import PuzzleResultModal from "../../../components/Chess/PuzzleResultsModal";
 
 
 function ChessPuzzle() {
@@ -165,7 +165,7 @@ function ChessPuzzleDisplay() {
                     <span>{currentPuzzle.popularity}% popularity</span>
                 </div>
             </PuzzleInfoPanel>
-
+            <PuzzleResultModal />
         </div>
     );
 }

@@ -21,6 +21,7 @@ export const PieceType = {
   king: 6,
 } as const;
 
+
 export type PieceType = (typeof PieceType)[keyof typeof PieceType];
 
 // --- promotions ------------------------------------------------------------
@@ -128,17 +129,18 @@ export interface ChessPuzzleResult {
 }
 
 export interface ChessPuzzleAttempt {
-    puzzleId: string
+  puzzleId: string
 
-    solved: boolean
-    hintUsed: boolean
-    revealed: boolean
+  solved: boolean
+  hintUsed: boolean
+  revealed: boolean
 
-    ratingBefore: number
-    ratingAfter: number
+  ratingBefore: number
+  ratingAfter: number
 
-    attemptedAt: Date
+  attemptedAt: Date
 }
+
 // --- Users & game wrapper ---------------------------------------------
 export interface ChessMove {
   chessGameId: number;

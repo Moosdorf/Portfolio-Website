@@ -23,6 +23,9 @@ export type ChessBoardContextValue = {
     choosePromotion: (promotionInfo: PromotionSquare) => void;
     setSelectedPiece: (piece: ChessPiece | null) => void;
     selectedGameOptions?: SelectedGameOptions;
+    forfeit?: () => Promise<void>;
+    requestDraw?: () => Promise<void>;
+    isEndingGame?: boolean;
 };
 
 export const ChessBoardContext = createContext<ChessBoardContextValue | undefined>(undefined);
