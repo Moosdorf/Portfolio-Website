@@ -76,9 +76,11 @@ public class AuthController(IAuthService authService, IUserService userService) 
     public async Task<IActionResult> IsUserLoggedIn()
     {
         var username = User.FindFirstValue(ClaimTypes.Name);
+        if (username == null) return NotFound();
 
-        Console.WriteLine("is user logged in: " + username);
         var user = await _userService.GetByUsername(username);
+        if (user == null) return NotFound();
+
         return Ok(new
         {
             user.Id,

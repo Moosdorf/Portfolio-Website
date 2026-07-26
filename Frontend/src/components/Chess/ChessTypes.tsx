@@ -127,7 +127,18 @@ export interface ChessPuzzleResult {
   puzzleRevealed: boolean
 }
 
+export interface ChessPuzzleAttempt {
+    puzzleId: string
 
+    solved: boolean
+    hintUsed: boolean
+    revealed: boolean
+
+    ratingBefore: number
+    ratingAfter: number
+
+    attemptedAt: Date
+}
 // --- Users & game wrapper ---------------------------------------------
 export interface ChessMove {
   chessGameId: number;

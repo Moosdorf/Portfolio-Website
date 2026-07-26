@@ -3,6 +3,7 @@ using Backend.Application.General.Services;
 using Backend.Application.Users.Services;
 using Backend.Domain.Entities.Chess.Games;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Application.Chess.Services;
@@ -13,16 +14,105 @@ public class ChessDataService : IChessDataService
 
     private AppDbContext _db;
     private IUserService _dataService;
+    private readonly IHubContext<ChessHub> _chessHub;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public ChessDataService(AppDbContext context, IUserService dataService)
+    public ChessDataService(AppDbContext context, IUserService dataService, IHubContext<ChessHub> chessHub, IServiceScopeFactory scopeFactory)
     {
         _db = context;
         _dataService = dataService;
+        _chessHub = chessHub;
+        _scopeFactory = scopeFactory;
     }
 
-    // Single entry point for Bot / Freeplay / Puzzle game creation.
-    // GameMode on the model decides how white/black ids are resolved;
-    // everything after that (building + saving the ChessGame) is shared.
+    // shared board-state loader — was duplicated in the Move and MoveBot controller actions
+    private static ChessBoard LoadBoardState(ChessGame game)
+    {
+        return game.Moves.Count > 0
+            ? new ChessBoard(game.Moves.Last().FEN)
+            : new ChessBoard();
+    }
+
+    // replaces the body of ChessController.Move
+    public async Task<ChessModel?> MakeMoveAsync(int chessId, MoveModel moveModel)
+    {
+        var game = await GetGameAsync(chessId);
+        if (game == null) return null;
+
+        var chessState = LoadBoardState(game);
+        if (!chessState.Move(moveModel)) return null;
+
+        var moveMade = await MoveAsync(chessId, moveModel.Move, chessState.FEN);
+        if (!moveMade) return null;
+
+        return CreateChessModel(chessState, game, "non");
+    }
+
+    // replaces the body of ChessController.MoveBot
+    public async Task<ChessModel?> MakePlayerMoveWithBotReplyAsync(int chessId, MoveModel moveModel)
+    {
+        var game = await GetGameAsync(chessId);
+        if (game == null) return null;
+
+        var chessState = LoadBoardState(game);
+        if (!chessState.Move(moveModel)) return null;
+
+        var moveMade = await MoveAsync(chessId, moveModel.Move, chessState.FEN);
+        if (!moveMade) return null;
+
+        var result = CreateChessModel(chessState, game, "non");
+
+        if (game.GameType == "Bot")
+        {
+            QueueBotReply(chessId, game.Id, chessState.FEN);
+        }
+
+        return result;
+    }
+
+    // fire-and-forget bot reply — runs in its own scope since the request's
+    // scoped services (db context etc.) are disposed once the response is sent
+    private void QueueBotReply(int chessId, int gameId, string fenAfterPlayerMove)
+    {
+        _ = Task.Run(async () =>
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var scopedChessDataService = scope.ServiceProvider.GetRequiredService<IChessDataService>();
+            var scopedStockFish = scope.ServiceProvider.GetRequiredService<IStockFishService>();
+
+            try
+            {
+                var freshGame = await scopedChessDataService.GetGameAsync(chessId);
+                if (freshGame == null) { Console.WriteLine("Game vanished"); return; }
+
+                // fresh board, independent from the one already returned to the player's HTTP response
+                var botChessState = new ChessBoard(fenAfterPlayerMove);
+                var stockFishMove = scopedStockFish.MoveFrom(fenAfterPlayerMove);
+
+                if (!botChessState.Move(stockFishMove))
+                {
+                    Console.WriteLine("Cannot make move - dataservice");
+                    return;
+                }
+
+                var moveMade = await scopedChessDataService.MoveAsync(chessId, stockFishMove.Move, botChessState.FEN);
+                if (!moveMade)
+                {
+                    Console.WriteLine("Cannot make move - database");
+                    return;
+                }
+
+                var botResult = scopedChessDataService.CreateChessModel(botChessState, freshGame, "non");
+
+                await _chessHub.Clients.Group($"game-{gameId}").SendAsync("BoardUpdated", botResult);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Bot move failed: {ex}");
+            }
+        });
+    }
+
     public async Task<(ChessGame, ChessBoard)> CreateGameAsync(CreateChessModel createChessModel)
     {
         var (whiteId, blackId) = createChessModel.GameMode == "Bot"

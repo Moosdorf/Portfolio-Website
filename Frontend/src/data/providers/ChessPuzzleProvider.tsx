@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChessBoardContext, type ChessBoardContextValue } from '../../components/Chess/ChessBoardContext';
-import { ChessGameMode, type ChessGame, type ChessPiece, type ChessPuzzle, type ChessPuzzleResult, type PromotionInformation, type PromotionSquare } from '../../components/Chess/ChessTypes';
+import { ChessGameMode, type ChessGame, type ChessPiece, type ChessPuzzle, type ChessPuzzleAttempt, type ChessPuzzleResult, type PromotionInformation, type PromotionSquare } from '../../components/Chess/ChessTypes';
 import { useAuth } from '../../data/providers/AuthProvider';
 import { ChessPuzzleContext } from '../../components/Chess/ChessPuzzleContext';
 import { useHistoryNavigation } from '../../hooks/chess/useHistoryNavigation';
@@ -33,7 +33,8 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     const [movesMade, setMovesMade] = useState<string[]>([])
     const [ratingChanged, setRatingChanged] = useState(0);
     const [hintActive, setHintActive] = useState(false);
-
+    const puzzleSessionRef = useRef(0);
+    
     const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
 
@@ -72,6 +73,7 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
     } = useHistoryNavigation(chessHistory, currentChessGame?.chessBoard ?? null);
 
     const fetchNewPuzzle = useCallback(async () => {
+        const mySession = ++puzzleSessionRef.current;
         setIsFetchingRandom(true);
         resetStats();
         try {
@@ -79,6 +81,8 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             let puzzle = await api.get<ChessPuzzle>('/api/puzzle/random', {
                 credentials: 'include',
             });
+
+            if (puzzleSessionRef.current !== mySession) return;
 
             setPuzzleMode(prev => ({...prev, puzzleType: "random"}));
 
@@ -117,17 +121,21 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
         } catch (err) {
             console.error('Failed to fetch chess board:', err);
-            setIsFetchingRandom(false);
+            if (puzzleSessionRef.current === mySession) setIsFetchingRandom(false);
+            
         }
     }, [user, snapToLive]);
 
     const fetchRankedPuzzle = useCallback(async () => {
+        const mySession = ++puzzleSessionRef.current;
         setIsFetchingRanked(true);
         resetStats();
         try {
             let puzzle = await api.get<ChessPuzzle>('/api/puzzle/ranked', {
                 credentials: 'include',
             });
+            if (puzzleSessionRef.current !== mySession) return;
+
             setPuzzleMode(prev => ({...prev, puzzleType: "ranked"}));
 
             setChessPuzzle(puzzle);
@@ -158,6 +166,7 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
             snapToLive();
 
             await sleep(1000);
+            if (puzzleSessionRef.current !== mySession) return;
 
             setCurrentChessGame({ ...startingGame, chessBoard: puzzle.chessBoards[1] });
             setMoveIndex(1);
@@ -165,14 +174,14 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
         } catch (err) {
             console.error('Failed to fetch chess board:', err);
-            setIsFetchingRanked(false);
+            if (puzzleSessionRef.current === mySession) setIsFetchingRandom(false);
         }
     }, [user, snapToLive]);
 
     const puzzleSolvedRequest = useCallback(async () => {
         if (!chessPuzzleResult) return;
 
-        let puzzleSolvedResponse = await api.put<number>('/api/puzzle/ranked/result', chessPuzzleResult, {credentials: 'include'});
+        let puzzleSolvedResponse = await api.put<ChessPuzzleAttempt>('/api/puzzle/ranked/result', chessPuzzleResult, {credentials: 'include'});
         console.log(puzzleSolvedResponse)
 
     }, [chessPuzzleResult])
@@ -184,11 +193,12 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
     const attack = useCallback(async (clickedPiece: ChessPiece, promotionType: number | null = null) => {
 
-        // check if piece can move
-        if (isSolved || isViewingHistory || !currentChessGame || !chessPuzzle || !selectedPiece || isMoving) {
+        // check if player can move the clicked piece 
+        if (isSolved || isViewingHistory || !currentChessGame || !chessPuzzle || !selectedPiece || isMoving || moveIndex % 2 == 0) {
             setSelectedPiece(null);
             return;
         }
+        const mySession = puzzleSessionRef.current;
 
         // check if attempted move is the correct solution
         const attempted = `${selectedPiece?.position},${clickedPiece.position}${(promotionType == 5) ? "q" : (promotionType == 4) ? "r" : (promotionType == 3) ? "b" : (promotionType == 2) ? "n" : ""}`;
@@ -220,6 +230,8 @@ function ChessPuzzleProvider({ children }: ChessPuzzleProviderProps) {
 
         if (afterPlayerIndex < chessPuzzle.moves.length) {
             await sleep(1000);
+
+            if (puzzleSessionRef.current !== mySession) return;
             const afterComputerIndex = afterPlayerIndex + 1;
             setCurrentChessGame(prev =>
                 prev ? { ...prev, chessBoard: chessPuzzle.chessBoards[afterComputerIndex] } : prev

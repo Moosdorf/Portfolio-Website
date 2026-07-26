@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Move> Moves { get; set; }
     public DbSet<Puzzle> Puzzles { get; set; }
     public DbSet<Tag> Tags { get; set; }
-
+    public DbSet<PuzzleAttempt> PuzzleAttempts { get; set; }
 
     // projects
     public DbSet<Project> Projects { get; set; }
@@ -81,6 +81,26 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Tag>()
             .HasIndex(t => t.Name)
             .IsUnique();
+
+        // puzzle attemps, match history
+        modelBuilder.Entity<PuzzleAttempt>()
+            .HasOne(pa => pa.User)
+            .WithMany() 
+            .HasForeignKey(pa => pa.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PuzzleAttempt>()
+            .HasOne(pa => pa.Puzzle)
+            .WithMany()
+            .HasForeignKey(pa => pa.Id)
+            .OnDelete(DeleteBehavior.Restrict); 
+
+        modelBuilder.Entity<PuzzleAttempt>()
+            .HasIndex(pa => new { pa.UserId, pa.AttemptedAt });
+
+
+        modelBuilder.Entity<Puzzle>()
+            .HasIndex(p => p.PuzzleId);
 
 
         /* --- PROJECT --- */

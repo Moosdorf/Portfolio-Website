@@ -1,9 +1,6 @@
-﻿
-using Backend.Application.Chess.DTO;
+﻿using Backend.Application.Chess.DTO;
 using Backend.Application.General.Services;
 using Backend.Domain.Entities.Chess.Games;
-
-namespace Backend.Application.Chess.Services;
 
 public interface IChessDataService
 {
@@ -13,11 +10,12 @@ public interface IChessDataService
     Task<PaginatedList<ChessGameHistoryDTO>> GetMatchHistory(string username, int pageIndex);
     Task<bool> MoveAsync(int chessId, string move, string FEN);
 
+    Task<ChessModel?> MakeMoveAsync(int chessId, MoveModel moveModel);
+    Task<ChessModel?> MakePlayerMoveWithBotReplyAsync(int chessId, MoveModel moveModel);
+
     public ChessModel CreateChessModel(ChessBoard chessState, ChessGame game, string sessionId);
 
     bool RemoveLastMove(int chessId);
-
-
 
     IList<ChessGame> GetGames();
 

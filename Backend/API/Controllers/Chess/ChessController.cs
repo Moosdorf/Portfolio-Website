@@ -20,18 +20,12 @@ namespace Backend.API.Controllers;
 public class ChessController : HomeController
 {
     IChessDataService chessDataService;
-    private readonly IServiceScopeFactory _scopeFactory;
     IStockFishService stockFish;
-    IHubContext<ChessHub> chessHub;
-    readonly LinkGenerator linkGenerator;
 
-    public ChessController(IServiceScopeFactory scopeFactory, IChessDataService chessDataService, IStockFishService stockFish, IHubContext<ChessHub> chessHub, LinkGenerator linkGenerator)
+    public ChessController(IChessDataService chessDataService, IStockFishService stockFish)
     {
         this.chessDataService = chessDataService;
-        this.chessHub = chessHub;
-        this.linkGenerator = linkGenerator;
         this.stockFish = stockFish;
-        _scopeFactory = scopeFactory;
     }
 
     [HttpGet]
@@ -99,84 +93,17 @@ public class ChessController : HomeController
     [Route("{id}/move")]
     public async Task<IActionResult> Move(int id, [FromBody] MoveModel moveModel)
     {
-        ChessGame? game = await chessDataService.GetGameAsync(id);
-        if (game == null) return NotFound("CannotFindGame");
-
-        ChessBoard chessState;
-        if (game.Moves.Count > 0)
-        {
-            chessState = new ChessBoard(game.Moves.Last().FEN);
-        }
-        else
-            chessState = new ChessBoard();
-
-        var canMove = chessState.Move(moveModel);
-        if (!canMove) return BadRequest("Cannot make move - dataservice");
-
-        var FEN = ChessMethods.GenerateFEN(chessState);
-
-        var moveMade = await chessDataService.MoveAsync(id, moveModel.Move, FEN);
-        if (!moveMade) return BadRequest("Cannot make move - database");
-
-        return Ok(chessDataService.CreateChessModel(chessState, game, "non"));
+        var result = await chessDataService.MakeMoveAsync(id, moveModel);
+        if (result == null) return BadRequest("Cannot make move");
+        return Ok(result);
     }
 
     [HttpPut]
     [Route("bot/{id}/move")]
     public async Task<IActionResult> MoveBot(int id, [FromBody] MoveModel moveModel)
     {
-        ChessGame? game = await chessDataService.GetGameAsync(id);
-        if (game == null) return NotFound("CannotFindGame");
-
-        ChessBoard chessState;
-        if (game.Moves.Count > 0)
-        {
-            chessState = new ChessBoard(game.Moves.Last().FEN);
-        }
-        else
-            chessState = new ChessBoard();
-
-        var canMove = chessState.Move(moveModel);
-        if (!canMove) return BadRequest("Cannot make move - dataservice");
-
-        var moveMade = await chessDataService.MoveAsync(id, moveModel.Move, chessState.FEN);
-        if (!moveMade) return BadRequest("Cannot make move - database");
-
-        var result = chessDataService.CreateChessModel(chessState, game, "non");
-
-        if (game.GameType == "Bot")
-        {
-            _ = Task.Run(async () =>
-            {
-                using var scope = _scopeFactory.CreateScope();
-                var scopedChessDataService = scope.ServiceProvider.GetRequiredService<IChessDataService>();
-                var scopedStockFish = scope.ServiceProvider.GetRequiredService<IStockFishService>();
-
-                try
-                {
-                    var freshGame = await scopedChessDataService.GetGameAsync(id);
-                    if (freshGame == null) { Console.WriteLine("Game vanished"); return; }
-
-                    var stockFishMove = scopedStockFish.MoveFrom(chessState.FEN);
-
-                    var canMove = chessState.Move(stockFishMove);
-                    if (!canMove) Console.WriteLine("Cannot make move - dataservice");
-
-                    var moveMade = await scopedChessDataService.MoveAsync(id, stockFishMove.Move, chessState.FEN);
-                    if (!moveMade) Console.WriteLine("Cannot make move - database");
-
-                    var botResult = scopedChessDataService.CreateChessModel(chessState, freshGame, "non");
-
-                    await chessHub.Clients.Group($"game-{game.Id}")
-                        .SendAsync("BoardUpdated", botResult);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Bot move failed: {ex}");
-                }
-            });
-        }
-
+        var result = await chessDataService.MakePlayerMoveWithBotReplyAsync(id, moveModel);
+        if (result == null) return BadRequest("Cannot make move");
         return Ok(result);
     }
 

@@ -22,4 +22,6 @@ public class User
     public List<ChessGame> GamesAsWhite { get; set; }
     [JsonIgnore]
     public List<ChessGame> GamesAsBlack { get; set; }
+    [JsonIgnore]
+    public List<PuzzleAttempt> PuzzleAttempts { get; set; }
 }

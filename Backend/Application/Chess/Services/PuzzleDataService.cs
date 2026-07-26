@@ -1,11 +1,7 @@
 ﻿using Backend.Application.Chess.DTO;
 using Backend.Domain.Entities.Chess.Games;
-using Backend.Domain.Entities.Users;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.Eventing.Reader;
-using System.Security.Claims;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace Backend.Application.Chess.Services;
@@ -37,7 +33,7 @@ public class PuzzleDataService : IPuzzleDataService
 
         // Step 3: get the PuzzleId for that random row
         var puzzle = _db.Puzzles
-            .OrderBy(p => p.Id)
+            .OrderBy(p => p.PuzzleId)
             .Skip(randomOffset)
             .Include(p => p.PuzzleTags)
             .ThenInclude(pt => pt.Tag)
@@ -63,7 +59,7 @@ public class PuzzleDataService : IPuzzleDataService
         var randomOffset = _random.Next(0, count);
 
         var puzzle = query
-            .OrderBy(p => p.Id) 
+            .OrderBy(p => p.PuzzleId) 
             .Skip(randomOffset)
             .Take(1)
             .Include(p => p.PuzzleTags)
@@ -86,43 +82,60 @@ public class PuzzleDataService : IPuzzleDataService
         {
             user.PuzzleRating -= 10;
         }
+        var ratingChanged = _db.SaveChanges() > 0;
 
-        return (_db.SaveChanges() > 0) ? user.PuzzleRating : 0;
+
+
+        return (ratingChanged) ? user.PuzzleRating : 0;
     }
 
-    public bool IsPuzzleSolved(string puzzleId, string[] moves)
+    public PuzzleAttempt? IsPuzzleSolved(string username, ChessPuzzleResult chessPuzzleResult)
     {
+        PuzzleAttempt puzzleAttempt;
+
+        var moves = chessPuzzleResult.MovesMade;
+
+        // get user
+        var user = _db.Users.Include(u => u.PuzzleAttempts)
+                             .FirstOrDefault(u => u.Username == username);
+        Console.WriteLine("user");
+        Console.WriteLine(user);
+
         // get puzzle
         var query = _db.Puzzles
-                .Where(p => p.PuzzleId == puzzleId);
+                .Where(p => p.PuzzleId == chessPuzzleResult.PuzzleId);
         var puzzle = query.FirstOrDefault();
-        Console.WriteLine(4.1);
+        Console.WriteLine("puzzle");
+        Console.WriteLine(puzzle);
 
+        if (puzzle == null || user == null || (moves.Length == 0 && !chessPuzzleResult.HintUsed && !chessPuzzleResult.PuzzleRevealed)) return null;
 
-        // check if puzzle and moves exists
-        Console.WriteLine(puzzle == null);
-
-        Console.WriteLine(moves.Length == 0 );
-
-        if (puzzle == null || moves.Length == 0) return false;
-        Console.WriteLine(4.2);
         var movesToCheck = puzzle.Moves.Split(" ")
                 .Select(x => x.Insert(2, ","))
                 .Where((x, i) => i % 2 != 0)
                 .ToArray();
-        Console.WriteLine("player moves");
-        foreach (var x in moves)
-        {
-            Console.WriteLine(x);
-        }
 
-        Console.WriteLine("Best moves");
-        foreach (var x in movesToCheck)
-        {
-            Console.WriteLine(x);
-        }
 
-        return moves.SequenceEqual(movesToCheck);
+        var successful = !chessPuzzleResult.HintUsed && !chessPuzzleResult.PuzzleRevealed && moves.SequenceEqual(movesToCheck);
+        var ratingBefore = user.PuzzleRating;
+        var ratingAfter = AdjustPuzzleRating(username, successful);
+
+        puzzleAttempt = new PuzzleAttempt
+                            {
+                                UserId = user.Id,
+                                User = user,
+                                PuzzleId = puzzle.PuzzleId,
+                                Puzzle = puzzle,
+                                HintUsed = chessPuzzleResult.HintUsed,
+                                Revealed = chessPuzzleResult.PuzzleRevealed,
+                                Solved = successful,
+                                MovesMade = moves,
+                                RatingBefore = ratingBefore,
+                                RatingAfter = ratingAfter
+        };
+
+        user.PuzzleAttempts.Add(puzzleAttempt);
+        return puzzleAttempt;
     }
 
     public PuzzleDTO CreatePuzzleDTO(Puzzle puzzle)

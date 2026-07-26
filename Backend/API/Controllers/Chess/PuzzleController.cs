@@ -1,4 +1,5 @@
 ﻿using API.Controllers;
+using AutoMapper;
 using Backend.Application.Chess;
 using Backend.Application.Chess.DTO;
 using Backend.Application.Chess.Services;
@@ -21,10 +22,12 @@ namespace ChessServer.Controllers
     {
         IPuzzleDataService _puzzleDataService;
         IUserService _userDataService;
-        public PuzzleController(IPuzzleDataService puzzleDataService, IUserService userDataService)
+        IMapper _mapper;
+        public PuzzleController(IPuzzleDataService puzzleDataService, IUserService userDataService, IMapper mapper)
         {
             _puzzleDataService = puzzleDataService;
             _userDataService = userDataService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -50,32 +53,15 @@ namespace ChessServer.Controllers
         [Route("ranked/result")]
         public async Task<IActionResult> PuzzleResult([FromBody] ChessPuzzleResult chessPuzzleResult)
         {
-            Console.WriteLine("puzzle results");
-            int newRating = 0;
-            Console.WriteLine(1);
-
             var username = User.FindFirstValue(ClaimTypes.Name);
             if (username == null) return BadRequest();
-            Console.WriteLine(2);
 
-            if (chessPuzzleResult.HintUsed || chessPuzzleResult.PuzzleRevealed)
-            {
-                newRating = _puzzleDataService.AdjustPuzzleRating(username, false);
-                Console.WriteLine(3);
-                return Ok(newRating);
-            }
-            Console.WriteLine(4);
+            var puzzleAttempt = _puzzleDataService.IsPuzzleSolved(username, chessPuzzleResult);
+            if (puzzleAttempt == null) return BadRequest("Cannot process puzzle result");
 
-            var successful = _puzzleDataService.IsPuzzleSolved(chessPuzzleResult.PuzzleId, chessPuzzleResult.MovesMade);
-            Console.WriteLine("puzzle successful: " + successful);
-
-            newRating = _puzzleDataService.AdjustPuzzleRating(username, successful);
-            
-            Console.WriteLine("user new rating: " + newRating);
-
-            return Ok(newRating);
+            return Ok(_mapper.Map<PuzzleAttemptDTO>(puzzleAttempt));
         }
 
-
     }
+
 }
